@@ -22,11 +22,11 @@ def verify_password(plain, hashed):
 
 def create_access_token(data: dict):
     expire = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    data.update({"exp": expire, "type": "access"})
+    data.update({"exp": expire})
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def create_refresh_token(data: dict):
     expire = datetime.now() + timedelta(days=7)
-    data.update({"exp": expire, "type": "refresh"})
+    data.update({"exp": expire})
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

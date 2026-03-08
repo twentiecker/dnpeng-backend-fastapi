@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.core.config import settings
 from app.models.user import User
+from app.models.token_blacklist import TokenBlacklist
 from app.repositories.user_repository import get_user_by_email
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -30,6 +31,21 @@ def get_current_user(
         if email is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
+
+        if payload.get("type") != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type"
+            )
+
+        blacklisted = (
+            db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first()
+        )
+
+        if blacklisted:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
             )
     except JWTError:
         raise HTTPException(

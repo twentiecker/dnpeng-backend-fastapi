@@ -8,6 +8,7 @@ def seed_superadmin():
 
     if not db.query(User).filter(User.email == "admin@admin.com").first():
         admin = User(
+            name="Admin",
             email="admin@admin.com",
             hashed_password=hash_password("admin123"),
             role="admin",

@@ -1,10 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from contextlib import asynccontextmanager
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.db.init_db import seed_superadmin
 from starlette.middleware.base import BaseHTTPMiddleware
 import logging
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger(__name__)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -16,23 +19,29 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title=settings.APP_NAME)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logging.info("FastAPI application starting")
+    seed_superadmin()
+    yield
+    logging.info("FastAPI application shutting down")
+
+
+app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
 app.include_router(api_router, prefix="/api/v1")
 app.add_middleware(SecurityHeadersMiddleware)
 
-seed_superadmin()
-
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
-        status_code=500,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal Server Error"},
     )
 

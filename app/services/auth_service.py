@@ -14,24 +14,31 @@ from app.models.user import User
 from app.models.token_blacklist import TokenBlacklist
 from app.repositories.user_repository import get_user_by_email, create_user
 from app.services.token_service import blacklist_token
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def register_user(db: Session, email: str, password: str):
+def register_user(db: Session, name: str, email: str, password: str):
     if get_user_by_email(db, email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
 
     user = User(
+        name=name,
         email=email,
         hashed_password=hash_password(password),
         role="user",
         is_active=True,
     )
+
+    logger.info(f"New user registered: {email}")
+
     return create_user(db, user)
 
 
-def login_user(db: Session, email: str, password: str):
+def login_user(db: Session, email: str, password: str, ip: str):
     user = get_user_by_email(db, email)
 
     if not user or not verify_password(password, user.hashed_password):
@@ -44,6 +51,8 @@ def login_user(db: Session, email: str, password: str):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User inactive",
         )
+
+    logger.info(f"User login success: {email} from {ip}")
 
     access_token = create_access_token(
         {"sub": user.email, "role": user.role, "type": "access"}
@@ -119,5 +128,14 @@ def refresh_access_token(db: Session, refresh_token: str):
 def logout_user(db: Session, access_token: str, refresh_token: str):
     blacklist_token(db, access_token, "access")
     blacklist_token(db, refresh_token, "refresh")
+
+    payload = jwt.decode(
+        access_token,
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
+    )
+    email = payload.get("sub")
+
+    logger.info(f"User logout: {email}")
 
     return {"message": "Successfully logged out"}
