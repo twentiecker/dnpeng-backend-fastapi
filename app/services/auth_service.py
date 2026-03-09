@@ -2,11 +2,11 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from jose import jwt, JWTError
-
 from app.core.config import settings
 from app.core.security import (
     hash_password,
     verify_password,
+    hash_token,
     create_access_token,
     create_refresh_token,
 )
@@ -72,8 +72,6 @@ def refresh_access_token(db: Session, refresh_token: str):
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-        exp = payload.get("exp")
-        expired_at = datetime.fromtimestamp(exp)
 
         email = payload.get("sub")
         if email is None:
@@ -94,7 +92,9 @@ def refresh_access_token(db: Session, refresh_token: str):
         )
 
     blacklisted = (
-        db.query(TokenBlacklist).filter(TokenBlacklist.token == refresh_token).first()
+        db.query(TokenBlacklist)
+        .filter(TokenBlacklist.token == hash_token(refresh_token))
+        .first()
     )
 
     if blacklisted:

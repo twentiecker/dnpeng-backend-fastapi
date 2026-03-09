@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
+import hashlib
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -18,6 +19,10 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 def create_access_token(data: dict):

@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from jose import jwt, JWTError
 from app.models.token_blacklist import TokenBlacklist
 from app.core.config import settings
+from app.core.security import hash_token
 
 
 def blacklist_token(db, token: str, token_type: str):
@@ -19,7 +20,7 @@ def blacklist_token(db, token: str, token_type: str):
         )
 
     entry = TokenBlacklist(
-        token=token,
+        token=hash_token(token),
         token_type=token_type,
         expired_at=datetime.fromtimestamp(exp),
     )

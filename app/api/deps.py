@@ -2,9 +2,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-
 from app.db.session import SessionLocal
 from app.core.config import settings
+from app.core.security import hash_token
 from app.models.user import User
 from app.models.token_blacklist import TokenBlacklist
 from app.repositories.user_repository import get_user_by_email
@@ -39,7 +39,9 @@ def get_current_user(
             )
 
         blacklisted = (
-            db.query(TokenBlacklist).filter(TokenBlacklist.token == token).first()
+            db.query(TokenBlacklist)
+            .filter(TokenBlacklist.token == hash_token(token))
+            .first()
         )
 
         if blacklisted:

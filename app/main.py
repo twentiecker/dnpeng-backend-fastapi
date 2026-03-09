@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.db.init_db import seed_superadmin
 from starlette.middleware.base import BaseHTTPMiddleware
 import logging
-from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
