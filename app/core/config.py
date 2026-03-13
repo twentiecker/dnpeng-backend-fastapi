@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from typing import List
 
 
 class Settings(BaseSettings):
@@ -12,6 +13,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     POSTGRES_PORT: int
+
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+
+    API_HOST: str = "127.0.0.1"
+    API_PORT: int = 8000
 
     class Config:
         env_file = ".env"

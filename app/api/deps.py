@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.security import hash_token
 from app.models.user import User
 from app.models.token_blacklist import TokenBlacklist
-from app.repositories.user_repository import get_user_by_email
+from app.repositories import user_repository as repo
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -54,7 +54,7 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
 
-    user = get_user_by_email(db, email)
+    user = repo.get_user_by_email(db, email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"

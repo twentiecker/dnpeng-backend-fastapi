@@ -1,4 +1,3 @@
-from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from jose import jwt, JWTError
@@ -12,15 +11,15 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.models.token_blacklist import TokenBlacklist
-from app.repositories.user_repository import get_user_by_email, create_user
-from app.services.token_service import blacklist_token
+from app.repositories import user_repository as repo
+from app.services import token_service as service
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 def register_user(db: Session, name: str, email: str, password: str):
-    if get_user_by_email(db, email):
+    if repo.get_user_by_email(db, email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
@@ -35,11 +34,11 @@ def register_user(db: Session, name: str, email: str, password: str):
 
     logger.info(f"New user registered: {email}")
 
-    return create_user(db, user)
+    return repo.create_user(db, user)
 
 
 def login_user(db: Session, email: str, password: str, ip: str):
-    user = get_user_by_email(db, email)
+    user = repo.get_user_by_email(db, email)
 
     if not user or not verify_password(password, user.hashed_password):
         raise HTTPException(
@@ -103,7 +102,7 @@ def refresh_access_token(db: Session, refresh_token: str):
             detail="Token has been revoked",
         )
 
-    user = get_user_by_email(db, email)
+    user = repo.get_user_by_email(db, email)
 
     if not user:
         raise HTTPException(
@@ -111,7 +110,7 @@ def refresh_access_token(db: Session, refresh_token: str):
             detail="User not found",
         )
 
-    blacklist_token(db, refresh_token, "refresh")
+    service.blacklist_token(db, refresh_token, "refresh")
 
     new_access_token = create_access_token(
         {"sub": user.email, "role": user.role, "type": "access"}
@@ -126,8 +125,8 @@ def refresh_access_token(db: Session, refresh_token: str):
 
 
 def logout_user(db: Session, access_token: str, refresh_token: str):
-    blacklist_token(db, access_token, "access")
-    blacklist_token(db, refresh_token, "refresh")
+    service.blacklist_token(db, access_token, "access")
+    service.blacklist_token(db, refresh_token, "refresh")
 
     payload = jwt.decode(
         access_token,

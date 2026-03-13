@@ -1,33 +1,42 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import (
+    APIRouter,
+    Depends,
+    Request,
+)
 from sqlalchemy.orm import Session
 from app.api.deps import get_db
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate
 from app.schemas.request import RefreshRequest, LogoutRequest
-from app.services.auth_service import (
-    register_user,
-    login_user,
-    refresh_access_token,
-    logout_user,
-)
+from app.services import auth_service as service
 
 router = APIRouter()
 
 
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    return register_user(db, user.name, user.email, user.password)
+    return service.register_user(db, user.name, user.email, user.password)
 
 
 @router.post("/login")
-def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
-    return login_user(db, user.email, user.password, request.client.host)
+def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    return service.login_user(
+        db,
+        form_data.username,
+        form_data.password,
+        request.client.host,
+    )
 
 
 @router.post("/refresh")
 def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
-    return refresh_access_token(db, data.refresh_token)
+    return service.refresh_access_token(db, data.refresh_token)
 
 
 @router.post("/logout")
 def logout(data: LogoutRequest, db: Session = Depends(get_db)):
-    return logout_user(db, data.access_token, data.refresh_token)
+    return service.logout_user(db, data.access_token, data.refresh_token)

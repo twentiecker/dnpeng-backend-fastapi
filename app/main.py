@@ -1,15 +1,26 @@
-from fastapi import FastAPI, Request, status
+from fastapi import (
+    FastAPI,
+    Request,
+    status,
+)
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from contextlib import asynccontextmanager
+import logging
+import time
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.db.init_db import seed_superadmin
-from starlette.middleware.base import BaseHTTPMiddleware
-import logging
 
 logger = logging.getLogger(__name__)
 
 
+# -----------------------------
+# Security Headers Middleware
+# -----------------------------
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
@@ -19,6 +30,28 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+# -----------------------------
+# Request Logging Middleware
+# -----------------------------
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+
+        response = await call_next(request)
+
+        process_time = time.time() - start
+        logger.info(
+            f"{request.method} {request.url.path} "
+            f"{response.status_code} "
+            f"{process_time:.3f}s"
+        )
+
+        return response
+
+
+# -----------------------------
+# Lifespan Event
+# -----------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("FastAPI application starting")
@@ -27,25 +60,85 @@ async def lifespan(app: FastAPI):
     logging.info("FastAPI application shutting down")
 
 
-app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+# -----------------------------
+# Create App
+# -----------------------------
+app = FastAPI(
+    title=settings.APP_NAME,
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
+
+# -----------------------------
+# Middleware
+# -----------------------------
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# gzip compression (lebih cepat untuk frontend)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# security headers
+app.add_middleware(SecurityHeadersMiddleware)
+
+# request logging
+app.add_middleware(LoggingMiddleware)
+
+# trusted host
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"],  # production isi domain saja
+)
+
+
+# -----------------------------
+# Router
+# -----------------------------
 app.include_router(api_router, prefix="/api/v1")
 app.add_middleware(SecurityHeadersMiddleware)
 
+
+# -----------------------------
+# Logging Config
+# -----------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 
 
+# -----------------------------
+# Global Exception Handler
+# -----------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error: {exc}")
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal Server Error"},
     )
 
 
+# -----------------------------
+# Health Check
+# -----------------------------
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+# -----------------------------
+# Root Endpoint
+# -----------------------------
 @app.get("/")
 def root():
     return {"message": "FastAPI Backend Running"}
