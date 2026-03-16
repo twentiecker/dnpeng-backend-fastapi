@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from collections import defaultdict
 from app.models.pkrt import Pkrt
-from app.repositories import pkrt_repository as repo
-from app.utils.helper import (
+from app.features.pkrt import repository as repo
+from app.features.pkrt.utils import (
     parse_periode,
     compute_qtoq,
     compute_yony,
@@ -12,9 +12,7 @@ from app.utils.helper import (
 
 
 def add_pkrt(db: Session, kode: str, deskripsi: str, periode: str, nilai: float):
-
     tahun, freq, period = parse_periode(periode)
-
     data = Pkrt(
         kode=kode,
         deskripsi=deskripsi,
@@ -23,12 +21,16 @@ def add_pkrt(db: Session, kode: str, deskripsi: str, periode: str, nilai: float)
         period=period,
         nilai=nilai,
     )
-
     return repo.create_pkrt(db, data)
 
 
 def get_pkrt_data(db: Session, kode: str | None, periode: str | None):
-    return repo.filter_pkrt(db, kode, periode)
+    tahun = None
+    freq = None
+    period = None
+    if periode:
+        tahun, freq, period = parse_periode(periode)
+    return repo.filter_pkrt(db, kode, tahun, freq, period)
 
 
 def get_pkrt_kode(db: Session, kode: str):
@@ -40,9 +42,7 @@ def get_pkrt_periode(db: Session, periode: str):
 
 
 def get_timeseries(db: Session, kode: str, start: int | None, end: int | None):
-
     data = repo.query_timeseries(db, kode, start, end)
-
     return {
         "kode": kode,
         "data": [{"periode": d.periode, "nilai": d.nilai} for d in data],

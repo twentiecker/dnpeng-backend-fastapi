@@ -1,3 +1,3 @@
-from .user import User
-from .token_blacklist import TokenBlacklist
-from .pkrt import Pkrt
+from app.models.user import User
+from app.models.token_blacklist import TokenBlacklist
+from app.models.pkrt import Pkrt

@@ -2,18 +2,18 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.api.deps import get_db
-from app.schemas.pkrt import PkrtCreate
-from app.services import pkrt_service as service
+from app.features.pkrt.schema import PkrtCreate
+from app.features.pkrt import service
 
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/data")
 def create_pkrt(data: PkrtCreate, db: Session = Depends(get_db)):
     return service.add_pkrt(db, data.kode, data.deskripsi, data.periode, data.nilai)
 
 
-@router.get("/")
+@router.get("/data")
 def pkrt_data(
     kode: Optional[str] = Query(None),
     periode: Optional[str] = Query(None),
@@ -22,13 +22,13 @@ def pkrt_data(
     return service.get_pkrt_data(db, kode, periode)
 
 
-@router.get("/kode/{kode}")
-def pkrt_by_kode(kode: str, db: Session = Depends(get_db)):
+@router.get("/kode")
+def retail_growth(kode: str, db: Session = Depends(get_db)):
     return service.get_pkrt_kode(db, kode)
 
 
-@router.get("/periode/{periode}")
-def pkrt_by_periode(periode: str, db: Session = Depends(get_db)):
+@router.get("/periode")
+def retail_growth(periode: str, db: Session = Depends(get_db)):
     return service.get_pkrt_periode(db, periode)
 
 

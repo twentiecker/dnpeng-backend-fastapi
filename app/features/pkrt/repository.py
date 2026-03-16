@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.pkrt import Pkrt
-from app.utils.helper import parse_periode
+from app.features.pkrt.utils import parse_periode
 
 
 def create_pkrt(db: Session, data: Pkrt):
@@ -56,13 +56,22 @@ def query_timeseries(
     end_year: int | None,
 ):
     query = db.query(Pkrt).filter(Pkrt.kode == kode)
-
     if start_year:
-        query = query.filter(Pkrt.tahun >= start_year)
-
+        tahun, freq, period = parse_periode(start_year)
+        # query = query.filter(Pkrt.tahun >= start_year)
+        query = query.filter(
+            Pkrt.tahun >= tahun,
+            Pkrt.freq == freq,
+            Pkrt.period >= period,
+        )
     if end_year:
-        query = query.filter(Pkrt.tahun <= end_year)
-
+        tahun, freq, period = parse_periode(end_year)
+        # query = query.filter(Pkrt.tahun <= end_year)
+        query = query.filter(
+            Pkrt.tahun <= tahun,
+            Pkrt.freq == freq,
+            Pkrt.period <= period,
+        )
     return query.order_by(Pkrt.tahun, Pkrt.period).all()
 
 
@@ -70,46 +79,7 @@ def get_indikator_list(db: Session):
     return db.query(Pkrt.kode, Pkrt.deskripsi).distinct().all()
 
 
-# def get_latest(db: Session):
-#     sub = (
-#         db.query(Pkrt.kode, func.max(Pkrt.periode).label("periode"))
-#         .group_by(Pkrt.kode)
-#         .subquery()
-#     )
-#     data = (
-#         db.query(Pkrt)
-#         .join(sub, (Pkrt.kode == sub.c.kode) & (Pkrt.periode == sub.c.periode))
-#         .all()
-#     )
-#     return data
-
-
-# def get_latest(db: Session):
-
-#     sub = (
-#         db.query(
-#             Pkrt.kode,
-#             func.max(Pkrt.tahun).label("tahun"),
-#         )
-#         .group_by(Pkrt.kode)
-#         .subquery()
-#     )
-
-#     data = (
-#         db.query(Pkrt)
-#         .join(
-#             sub,
-#             (Pkrt.kode == sub.c.kode) & (Pkrt.tahun == sub.c.tahun),
-#         )
-#         .order_by(Pkrt.kode, Pkrt.period.desc())
-#         .all()
-#     )
-
-#     return data
-
-
 def get_latest(db: Session):
-
     sub = db.query(
         Pkrt.id,
         func.row_number()
@@ -119,7 +89,5 @@ def get_latest(db: Session):
         )
         .label("rn"),
     ).subquery()
-
     data = db.query(Pkrt).join(sub, Pkrt.id == sub.c.id).filter(sub.c.rn == 1).all()
-
     return data
