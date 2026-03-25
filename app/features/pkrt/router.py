@@ -23,17 +23,17 @@ def pkrt_data(
 
 
 @router.get("/kode")
-def retail_growth(kode: str, db: Session = Depends(get_db)):
+def pkrt_kode(kode: str, db: Session = Depends(get_db)):
     return service.get_pkrt_kode(db, kode)
 
 
 @router.get("/periode")
-def retail_growth(periode: str, db: Session = Depends(get_db)):
+def pkrt_periode(periode: str, db: Session = Depends(get_db)):
     return service.get_pkrt_periode(db, periode)
 
 
 @router.get("/timeseries")
-def retail_timeseries(
+def pkrt_timeseries(
     kode: str = Query(...),
     start: Optional[str] = None,
     end: Optional[str] = None,
@@ -53,22 +53,22 @@ def indikator_list(db: Session = Depends(get_db)):
 
 
 @router.get("/growth")
-def retail_growth(kode: str, type: str, db: Session = Depends(get_db)):
+def pkrt_growth(kode: str, type: str, db: Session = Depends(get_db)):
     return service.get_growth_rate(db, kode, type)
 
 
 @router.get("/annual")
-def retail_annual(kode: str, db: Session = Depends(get_db)):
+def pkrt_annual(kode: str, db: Session = Depends(get_db)):
     return service.get_annual_data(db, kode)
 
 
 @router.get("/chart")
-def retail_chart(kode: str, db: Session = Depends(get_db)):
+def pkrt_chart(kode: str, db: Session = Depends(get_db)):
     return service.get_chart_data(db, kode)
 
 
 @router.get("/growth/chart")
-def retail_growth_chart(
+def pkrt_growth_chart(
     kode: str,
     type: str = "qtoq",
     db: Session = Depends(get_db),
@@ -77,7 +77,7 @@ def retail_growth_chart(
 
 
 @router.get("/annual/chart")
-def retail_annual_chart(
+def pkrt_annual_chart(
     kode: str,
     db: Session = Depends(get_db),
 ):

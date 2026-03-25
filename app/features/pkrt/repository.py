@@ -58,7 +58,6 @@ def query_timeseries(
     query = db.query(Pkrt).filter(Pkrt.kode == kode)
     if start_year:
         tahun, freq, period = parse_periode(start_year)
-        # query = query.filter(Pkrt.tahun >= start_year)
         query = query.filter(
             Pkrt.tahun >= tahun,
             Pkrt.freq == freq,
@@ -66,7 +65,6 @@ def query_timeseries(
         )
     if end_year:
         tahun, freq, period = parse_periode(end_year)
-        # query = query.filter(Pkrt.tahun <= end_year)
         query = query.filter(
             Pkrt.tahun <= tahun,
             Pkrt.freq == freq,

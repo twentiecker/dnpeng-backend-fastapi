@@ -1,9 +1,11 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from collections import defaultdict
 from app.models.pkrt import Pkrt
 from app.features.pkrt import repository as repo
 from app.features.pkrt.utils import (
     parse_periode,
+    monthly_to_quarterly,
     compute_qtoq,
     compute_yony,
     compute_ctoc,
@@ -12,7 +14,10 @@ from app.features.pkrt.utils import (
 
 
 def add_pkrt(db: Session, kode: str, deskripsi: str, periode: str, nilai: float):
-    tahun, freq, period = parse_periode(periode)
+    try:
+        tahun, freq, period = parse_periode(periode)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     data = Pkrt(
         kode=kode,
         deskripsi=deskripsi,
@@ -60,8 +65,19 @@ def get_latest(db: Session):
 
 def get_growth_rate(db: Session, kode: str, type: str):
     data = repo.query_timeseries(db, kode, None, None)
-    if type == "qtoq":
-        result = compute_qtoq(data)
+    if not data:
+        return {"kode": kode, "type": type, "data": []}
+    period_type = data[0].freq  # M atau Q
+    if type == "qtoq" or type == "mtom":
+        if period_type == "M" and type == "qtoq":
+            quarterly_data = monthly_to_quarterly(data)
+            result = compute_qtoq(quarterly_data)
+        elif (period_type == "Q" and type == "qtoq") or (
+            period_type == "M" and type == "mtom"
+        ):
+            result = compute_qtoq(data)
+        else:
+            result = []
     elif type == "yony":
         result = compute_yony(data)
     elif type == "ctoc":

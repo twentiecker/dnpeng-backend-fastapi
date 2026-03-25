@@ -1,8 +1,15 @@
 def parse_periode(periode: str):
-    tahun = int(periode[:4])
-    freq = periode[4]
-    period = int(periode[5:])
-    return tahun, freq, period
+    try:
+        tahun = int(periode[:4])
+        freq = periode[4]
+        period = int(periode[5:])
+        if freq == "Q" and not (1 <= period <= 4):
+            raise ValueError("Quarter harus 1-4")
+        if freq == "M" and not (1 <= period <= 12):
+            raise ValueError("Month harus 1-12")
+        return tahun, freq, period
+    except Exception:
+        raise ValueError("Format periode tidak valid")
 
 
 def detect_shift(data):
@@ -16,6 +23,22 @@ def detect_shift(data):
     return 1
 
 
+def monthly_to_quarterly(data):
+    result = []
+    for i in range(0, len(data), 3):
+        chunk = data[i : i + 3]
+        if len(chunk) < 3:
+            continue
+        total = sum(d.nilai for d in chunk)
+        result.append(
+            {
+                "periode": chunk[-1].periode,  # pakai bulan terakhir sebagai label
+                "nilai": total,
+            }
+        )
+    return result
+
+
 def calc_growth(curr, prev):
     if prev == 0:
         return None
@@ -25,11 +48,15 @@ def calc_growth(curr, prev):
 def compute_qtoq(data):
     result = []
     for i, d in enumerate(data):
+        nilai = d["nilai"] if isinstance(d, dict) else d.nilai
+        periode = d["periode"] if isinstance(d, dict) else d.periode
         if i == 0:
             growth = None
         else:
-            growth = calc_growth(d.nilai, data[i - 1].nilai)
-        result.append({"periode": d.periode, "nilai": d.nilai, "growth": growth})
+            prev = data[i - 1]
+            prev_nilai = prev["nilai"] if isinstance(prev, dict) else prev.nilai
+            growth = calc_growth(nilai, prev_nilai)
+        result.append({"periode": periode, "nilai": nilai, "growth": growth})
     return result
 
 

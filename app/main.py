@@ -2,8 +2,10 @@ from fastapi import (
     FastAPI,
     Request,
     status,
+    HTTPException,
 )
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -13,6 +15,7 @@ import logging
 import time
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.core.exceptions import validation_exception_handler
 from app.db.init_db import seed_superadmin
 
 logger = logging.getLogger(__name__)
@@ -103,7 +106,6 @@ app.add_middleware(
 # Router
 # -----------------------------
 app.include_router(api_router, prefix="/api/v1")
-app.add_middleware(SecurityHeadersMiddleware)
 
 
 # -----------------------------
@@ -116,7 +118,21 @@ logging.basicConfig(
 
 
 # -----------------------------
-# Global Exception Handler
+# Validation Exception Handler (spesifik)
+# -----------------------------
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
+
+# @app.exception_handler(HTTPException)
+# async def http_exception_handler(request: Request, exc: HTTPException):
+#     return JSONResponse(
+#         status_code=exc.status_code,
+#         content={"success": False, "message": exc.detail},
+#     )
+
+
+# -----------------------------
+# Global Exception Handler (fallback)
 # -----------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -124,7 +140,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal Server Error"},
+        # content={"detail": "Internal Server Error"},
+        content={"success": False, "message": "Internal Server Error"},
     )
 
 
