@@ -4,6 +4,7 @@ from fastapi import (
     status,
     HTTPException,
 )
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +17,7 @@ import time
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.exceptions import validation_exception_handler
+from app.core.static import setup_static
 from app.db.init_db import seed_superadmin
 
 logger = logging.getLogger(__name__)
@@ -71,6 +73,12 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+# -----------------------------
+# Static Files (Public Assets)
+# -----------------------------
+setup_static(app)
 
 
 # -----------------------------
@@ -140,7 +148,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        # content={"detail": "Internal Server Error"},
         content={"success": False, "message": "Internal Server Error"},
     )
 
