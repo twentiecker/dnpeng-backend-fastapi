@@ -19,6 +19,37 @@ class Settings(BaseSettings):
     API_HOST: str = "127.0.0.1"
     API_PORT: int = 8000
 
+    BASE_PATH: str = "public/files"
+    BASE_PATH_CPANEL: str = "/home/devdnpen/api-suplemen/public/files"
+    ALLOWED_CATEGORIES: List[str] = [
+        "intl",
+        "bri",
+        "bca",
+        "mandiri",
+        "pefindo",
+        "kemenkeu",
+        "bi",
+        "samuel",
+        "data",
+        "pengeluaran",
+        "produksi",
+        "suplemen",
+        "vicon",
+        "rapat",
+        "paparan",
+        "brs",
+        "lapres",
+    ]
+    ALLOWED_EXTENSIONS: List[str] = [
+        ".pdf",
+        ".xls",
+        ".xlsx",
+        ".ppt",
+        ".pptx",
+        ".doc",
+        ".docx",
+    ]
+
     class Config:
         env_file = ".env"
 

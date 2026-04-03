@@ -73,7 +73,7 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     # -----------------------------
-    # comment root_path saat deploy di cpanel,
+    # aktifkan root_path saat deploy di cpanel,
     # isi dengan nama sub_direktori yang digunakan
     # untuk deploy fastapi dengan python app
     # -----------------------------
@@ -83,6 +83,7 @@ app = FastAPI(
 
 # -----------------------------
 # Static Files (Public Assets)
+# comment saat deploy di cpanel
 # -----------------------------
 setup_static(app)
 

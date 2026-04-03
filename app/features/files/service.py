@@ -1,25 +1,18 @@
 import os
 from datetime import datetime
-
-BASE_FOLDER = "public/files"
-
-
-def format_date(date_str):
-    dt = datetime.strptime(date_str, "%d%m%Y")
-    return dt.strftime("%d %b %Y")
-
-
-def format_size(size_bytes):
-    if size_bytes < 1024:
-        return f"{size_bytes} B"
-    elif size_bytes < 1024 * 1024:
-        return f"{round(size_bytes / 1024, 1)} KB"
-    else:
-        return f"{round(size_bytes / (1024 * 1024), 1)} MB"
+from fastapi import UploadFile
+from sqlalchemy.orm import Session
+from app.features.files.utils import (
+    save_file,
+    format_date,
+    format_size,
+)
+from app.features.files.repository import save
+from app.core.config import settings
 
 
 def get_files_by_category(category: str):
-    folder_path = os.path.join(BASE_FOLDER, category)
+    folder_path = os.path.join(settings.BASE_PATH, category)
 
     if not os.path.exists(folder_path):
         return []
@@ -30,22 +23,61 @@ def get_files_by_category(category: str):
         filepath = os.path.join(folder_path, filename)
 
         if os.path.isfile(filepath):
-            name_no_ext = filename.replace(".pdf", "")
-            parts = name_no_ext.split("_")
+            # ✅ ambil extension
+            name, ext = os.path.splitext(filename)
+
+            # ❌ skip kalau bukan file yang diizinkan
+            if ext.lower() not in settings.ALLOWED_EXTENSIONS:
+                continue
+
+            parts = name.split("_")
 
             name = parts[0]
             date_raw = parts[1] if len(parts) > 1 else None
 
             size = os.path.getsize(filepath)
 
+            # 👉 parsing datetime untuk sorting
+            date_obj = None
+            if date_raw:
+                try:
+                    date_obj = datetime.strptime(date_raw, "%d%m%Y")
+                except:
+                    pass
+
             result.append(
                 {
                     "file_name": name,
+                    "ext_name": ext,
                     "date": format_date(date_raw) if date_raw else "-",
                     "size": format_size(size),
                     "path": f"/files/{category}/{filename}",
                     "original_name": filename,
+                    "_date_obj": date_obj,  # 👉 field bantu
                 }
             )
 
+    # ✅ sorting: terbaru di atas
+    result.sort(
+        key=lambda x: x["_date_obj"] if x["_date_obj"] else datetime.min,
+        reverse=True,
+    )
+
     return result
+
+
+def upload_document(file: UploadFile, jenis_file: str, tanggal_rilis: str, db: Session):
+    result = save_file(file, jenis_file, tanggal_rilis)
+
+    data = {
+        "filename": result["filename"],
+        "file_path": result["file_path"],
+        "jenis_file": jenis_file,
+        "size": result["size"],
+    }
+
+    # jika pakai DB
+    if db:
+        save(db, data)
+
+    return data
