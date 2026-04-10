@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from collections import defaultdict
 from app.models.pkrt import Pkrt
 from app.features.pkrt import repository as repo
-from app.features.pkrt.utils import (
+from app.services.timeseries import (
     parse_periode,
     monthly_to_quarterly,
     compute_qtoq,
@@ -13,7 +13,15 @@ from app.features.pkrt.utils import (
 )
 
 
-def add_pkrt(db: Session, kode: str, deskripsi: str, periode: str, nilai: float):
+def add_pkrt(
+    db: Session,
+    kode: str,
+    deskripsi: str,
+    satuan: str,
+    konversi: str,
+    periode: str,
+    nilai: float,
+):
     try:
         tahun, freq, period = parse_periode(periode)
     except ValueError as e:
@@ -21,6 +29,8 @@ def add_pkrt(db: Session, kode: str, deskripsi: str, periode: str, nilai: float)
     data = Pkrt(
         kode=kode,
         deskripsi=deskripsi,
+        satuan=satuan,
+        konversi=konversi,
         tahun=tahun,
         freq=freq,
         period=period,
@@ -78,10 +88,22 @@ def get_growth_rate(db: Session, kode: str, type: str):
             result = compute_qtoq(data)
         else:
             result = []
-    elif type == "yony":
-        result = compute_yony(data)
-    elif type == "ctoc":
-        result = compute_ctoc(data)
+    elif type == "yony" or type == "yony_m":
+        if period_type == "M" and type == "yony":
+            quarterly_data = monthly_to_quarterly(data)
+            result = compute_yony(quarterly_data)
+        elif (period_type == "Q" and type == "yony") or (
+            period_type == "M" and type == "yony_m"
+        ):
+            result = compute_yony(data)
+    elif type == "ctoc" or type == "ytod":
+        if period_type == "M" and type == "ctoc":
+            quarterly_data = monthly_to_quarterly(data)
+            result = compute_ctoc(quarterly_data)
+        elif (period_type == "Q" and type == "ctoc") or (
+            period_type == "M" and type == "ytod"
+        ):
+            result = compute_ctoc(data)
     elif type == "annual":
         result = compute_annual(data)
     else:
@@ -89,15 +111,38 @@ def get_growth_rate(db: Session, kode: str, type: str):
     return {"kode": kode, "type": type, "data": result}
 
 
+def get_quarter_data(db: Session, kode: str):
+    data = repo.query_timeseries(db, kode, None, None)
+    if not data:
+        return {"kode": kode, "data": []}
+    result = monthly_to_quarterly(data)
+    return {"kode": kode, "data": result}
+
+
 def get_annual_data(db: Session, kode: str):
     data = repo.query_timeseries(db, kode, None, None)
+    if not data:
+        return {"kode": kode, "data": []}
+    konversi = data[0].konversi  # ✅ ambil sekali
     annual = defaultdict(list)
+    # grouping per tahun
     for d in data:
         year = d.periode[:4]
-        annual[year].append(d.nilai)
+        annual[year].append(d)
     result = []
-    for year, values in annual.items():
-        result.append({"tahun": year, "nilai": sum(values)})
+    for year, items in annual.items():
+        values = [d.nilai for d in items]
+        if konversi == "SUM":
+            nilai = sum(values)
+        elif konversi == "AVG":
+            nilai = sum(values) / len(values)
+        elif konversi == "last":
+            # ambil periode terakhir dalam tahun
+            last_item = sorted(items, key=lambda x: x.periode)[-1]
+            nilai = last_item.nilai
+        else:
+            raise ValueError(f"Metode konversi tidak dikenali: {konversi}")
+        result.append({"tahun": year, "nilai": nilai})
     return {"kode": kode, "data": result}
 
 
@@ -133,6 +178,25 @@ def get_growth_chart(db: Session, kode: str, type: str):
                 "name": f"{type}_growth",
                 "data": growth,
             },
+        ],
+    }
+
+
+def get_quarter_chart(db: Session, kode: str):
+    result = get_quarter_data(db, kode)
+    periode = []
+    nilai = []
+    for row in result["data"]:
+        periode.append(row["periode"])
+        nilai.append(row["nilai"])
+    return {
+        "kode": kode,
+        "xAxis": periode,
+        "series": [
+            {
+                "name": "quarter",
+                "data": nilai,
+            }
         ],
     }
 

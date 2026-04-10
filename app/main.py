@@ -4,7 +4,6 @@ from fastapi import (
     status,
     HTTPException,
 )
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,16 +40,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start = time.time()
-
         response = await call_next(request)
-
         process_time = time.time() - start
         logger.info(
             f"{request.method} {request.url.path} "
             f"{response.status_code} "
             f"{process_time:.3f}s"
         )
-
         return response
 
 
@@ -152,7 +148,6 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled error: {exc}")
-
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"success": False, "message": "Internal Server Error"},

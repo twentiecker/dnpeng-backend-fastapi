@@ -5,7 +5,6 @@ from app.core.security import hash_password
 
 def seed_superadmin():
     db = SessionLocal()
-
     if not db.query(User).filter(User.email == "admin@admin.com").first():
         admin = User(
             name="Admin",
@@ -15,5 +14,4 @@ def seed_superadmin():
         )
         db.add(admin)
         db.commit()
-
     db.close()

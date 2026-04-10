@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    Query,
+)
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.api.deps import get_db
@@ -10,7 +14,15 @@ router = APIRouter()
 
 @router.post("/data", response_model=PkrtResponse)
 def create_pkrt(data: PkrtCreate, db: Session = Depends(get_db)):
-    return service.add_pkrt(db, data.kode, data.deskripsi, data.periode, data.nilai)
+    return service.add_pkrt(
+        db,
+        data.kode,
+        data.deskripsi,
+        data.satuan,
+        data.konversi,
+        data.periode,
+        data.nilai,
+    )
 
 
 @router.get("/data")
@@ -48,13 +60,18 @@ def indikator_list(db: Session = Depends(get_db)):
 
 
 @router.get("/latest")
-def indikator_list(db: Session = Depends(get_db)):
+def pkrt_latest(db: Session = Depends(get_db)):
     return service.get_latest(db)
 
 
 @router.get("/growth")
 def pkrt_growth(kode: str, type: str, db: Session = Depends(get_db)):
     return service.get_growth_rate(db, kode, type)
+
+
+@router.get("/quarter")
+def pkrt_quarter(kode: str, db: Session = Depends(get_db)):
+    return service.get_quarter_data(db, kode)
 
 
 @router.get("/annual")
@@ -74,6 +91,14 @@ def pkrt_growth_chart(
     db: Session = Depends(get_db),
 ):
     return service.get_growth_chart(db, kode, type)
+
+
+@router.get("/quarter/chart")
+def pkrt_quarter_chart(
+    kode: str,
+    db: Session = Depends(get_db),
+):
+    return service.get_quarter_chart(db, kode)
 
 
 @router.get("/annual/chart")

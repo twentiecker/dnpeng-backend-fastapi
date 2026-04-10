@@ -11,14 +11,13 @@ from datetime import datetime, timezone
 from app.db.base import Base
 
 
-class Pkrt(Base):
-    __tablename__ = "pkrt"
+class Pdb(Base):
+    __tablename__ = "pdb"
 
     id = Column(Integer, primary_key=True, index=True)
-    kode = Column(String, index=True, nullable=False)
+    kode = Column(Integer, index=True, nullable=False)
     deskripsi = Column(String, nullable=False)
-    satuan = Column(String, nullable=False)
-    konversi = Column(String, nullable=False)
+    jenis = Column(String(4), index=True, nullable=False)
     tahun = Column(Integer, index=True, nullable=False)
     freq = Column(String(1), index=True, nullable=False)  # M / Q / Y
     period = Column(Integer, index=True, nullable=False)  # 1-12 / 1-4
@@ -29,8 +28,10 @@ class Pkrt(Base):
     )
 
     __table_args__ = (
-        Index("idx_pkrt_lookup", "kode", "freq", "tahun", "period"),
-        UniqueConstraint("kode", "tahun", "freq", "period", name="uq_pkrt_kode_time"),
+        Index("idx_pdb_lookup", "kode", "jenis", "freq", "tahun", "period"),
+        UniqueConstraint(
+            "kode", "jenis", "tahun", "freq", "period", name="uq_pdb_kode_time"
+        ),
     )
 
     @property

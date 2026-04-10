@@ -2,10 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from jose import jwt
 from app.core.config import settings
-from app.core.security import (
-    hash_password,
-    verify_password,
-)
+from app.core.security import hash_password, verify_password
 from app.models.user import User
 from app.repositories import user as repo
 from app.features.auth.services import token_service
