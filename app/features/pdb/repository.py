@@ -104,7 +104,7 @@ def query_timeseries(
 
 
 def get_indikator_list(db: Session):
-    return db.query(Pdb.kode, Pdb.deskripsi).order_by(Pdb.kode).distinct().all()
+    return db.query(Pdb.kode, Pdb.deskripsi).distinct().order_by(Pdb.kode).all()
 
 
 def get_latest(db: Session, jenis: str | None = None):

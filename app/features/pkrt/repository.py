@@ -82,7 +82,7 @@ def query_timeseries(
 
 
 def get_indikator_list(db: Session):
-    return db.query(Pkrt.kode, Pkrt.deskripsi).distinct().all()
+    return db.query(Pkrt.kode, Pkrt.deskripsi).distinct().order_by(Pkrt.kode).all()
 
 
 def get_latest(db: Session):
