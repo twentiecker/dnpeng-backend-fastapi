@@ -1,6 +1,7 @@
 from app.models.user import User
 from app.models.token_blacklist import TokenBlacklist
 from app.models.pkrt import Pkrt
+from app.models.pkp import Pkp
 from app.models.pmtb import Pmtb
 from app.models.eksim import Eksim
 from app.models.pdb import Pdb
