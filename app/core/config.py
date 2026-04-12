@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     ALLOWED_CATEGORIES: List[str] = [
         "intl",
         "bri",
+        "lps",
+        "indef",
         "bca",
         "mandiri",
         "pefindo",

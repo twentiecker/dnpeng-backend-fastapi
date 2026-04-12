@@ -3,6 +3,25 @@ import shutil
 from fastapi import UploadFile
 from datetime import datetime
 from app.core.config import settings
+import re
+
+
+def extract_date_from_filename(filename: str) -> datetime:
+    """
+    Extract date from filename with format: name_ddmmyyyy.ext
+    contoh: receipt_31032026.pdf
+    """
+    match = re.search(r"_(\d{8})", filename)
+
+    if not match:
+        return None
+
+    date_str = match.group(1)
+
+    try:
+        return datetime.strptime(date_str, "%d%m%Y")
+    except ValueError:
+        return None
 
 
 def format_date(date_str):

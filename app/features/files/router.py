@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 from urllib.parse import unquote
 from app.features.files.schema import FileUploadResponse
-from app.features.files.service import get_files_by_category, upload_document
+from app.features.files.service import (
+    upload_document,
+    get_files_by_category,
+    get_recent_files,
+)
 from app.api.deps import get_db, get_current_user
 from app.core.config import settings
 import os
@@ -38,6 +42,11 @@ def upload_file(
 @router.get("/{category}")
 def get_files(category: str):
     return get_files_by_category(category)
+
+
+@router.get("/data/recent")
+def get_recent(limit: int = 6, db: Session = Depends(get_db)):
+    return get_recent_files(limit, db)
 
 
 # -----------------------------

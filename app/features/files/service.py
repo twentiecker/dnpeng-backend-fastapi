@@ -3,12 +3,53 @@ from datetime import datetime
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from app.features.files.utils import (
+    extract_date_from_filename,
     save_file,
     format_date,
     format_size,
 )
-from app.features.files.repository import save
+from app.features.files.repository import get_all_files, save
 from app.core.config import settings
+
+
+def get_recent_files(limit: int, db: Session):
+    files = get_all_files(db)
+
+    enriched_files = []
+
+    for file in files:
+        file_date = extract_date_from_filename(file.filename)
+
+        if file_date:
+            enriched_files.append(
+                {
+                    "id": file.id,
+                    "filename": file.filename,
+                    "file_path": file.file_path,
+                    "jenis_file": file.jenis_file,
+                    "size": format_size(file.size),
+                    "date_obj": file_date,
+                }
+            )
+
+    # sort descending (terbaru dulu)
+    sorted_files = sorted(enriched_files, key=lambda x: x["date_obj"], reverse=True)
+
+    # ✅ baru format setelah sorting
+    result = []
+    for file in sorted_files[:limit]:
+        result.append(
+            {
+                "id": file["id"],
+                "filename": file["filename"],
+                "file_path": file["file_path"],
+                "jenis_file": file["jenis_file"],
+                "size": file["size"],
+                "date": file["date_obj"].strftime("%d %b %Y"),
+            }
+        )
+
+    return result
 
 
 def get_files_by_category(category: str):
