@@ -73,46 +73,93 @@ def get_latest(db: Session):
     return repo.get_latest(db)
 
 
+# def get_growth_rate(db: Session, kode: str, type: str):
+#     data = repo.query_timeseries(db, kode, None, None)
+#     if not data:
+#         return {"kode": kode, "type": type, "data": []}
+#     period_type = data[0].freq  # M atau Q
+#     if type == "qtoq" or type == "mtom":
+#         if period_type == "M" and type == "qtoq":
+#             quarterly_data = monthly_to_quarterly(data)
+#             result = compute_qtoq(quarterly_data)
+#         elif (period_type == "Q" and type == "qtoq") or (
+#             period_type == "M" and type == "mtom"
+#         ):
+#             result = compute_qtoq(data)
+#         else:
+#             result = []
+#     elif type == "yony" or type == "yony_m":
+#         if period_type == "M" and type == "yony":
+#             quarterly_data = monthly_to_quarterly(data)
+#             result = compute_yony(quarterly_data)
+#         elif (period_type == "Q" and type == "yony") or (
+#             period_type == "M" and type == "yony_m"
+#         ):
+#             result = compute_yony(data)
+#     elif type == "ctoc" or type == "ytod":
+#         if period_type == "M" and type == "ctoc":
+#             quarterly_data = monthly_to_quarterly(data)
+#             result = compute_ctoc(quarterly_data)
+#         elif (period_type == "Q" and type == "ctoc") or (
+#             period_type == "M" and type == "ytod"
+#         ):
+#             result = compute_ctoc(data)
+#     elif type == "annual":
+#         result = compute_annual(data)
+#     else:
+#         result = []
+#     return {"kode": kode, "type": type, "data": result}
+
+
 def get_growth_rate(db: Session, kode: str, type: str):
-    data = repo.query_timeseries(db, kode, None, None)
+    data = repo.query_timeseries(db, kode)
+
     if not data:
         return {"kode": kode, "type": type, "data": []}
-    period_type = data[0].freq  # M atau Q
-    if type == "qtoq" or type == "mtom":
-        if period_type == "M" and type == "qtoq":
-            quarterly_data = monthly_to_quarterly(data)
-            result = compute_qtoq(quarterly_data)
-        elif (period_type == "Q" and type == "qtoq") or (
-            period_type == "M" and type == "mtom"
-        ):
-            result = compute_qtoq(data)
-        else:
-            result = []
-    elif type == "yony" or type == "yony_m":
-        if period_type == "M" and type == "yony":
-            quarterly_data = monthly_to_quarterly(data)
-            result = compute_yony(quarterly_data)
-        elif (period_type == "Q" and type == "yony") or (
-            period_type == "M" and type == "yony_m"
-        ):
-            result = compute_yony(data)
-    elif type == "ctoc" or type == "ytod":
-        if period_type == "M" and type == "ctoc":
-            quarterly_data = monthly_to_quarterly(data)
-            result = compute_ctoc(quarterly_data)
-        elif (period_type == "Q" and type == "ctoc") or (
-            period_type == "M" and type == "ytod"
-        ):
-            result = compute_ctoc(data)
-    elif type == "annual":
-        result = compute_annual(data)
-    else:
-        result = []
-    return {"kode": kode, "type": type, "data": result}
+
+    period_type = data[0].freq  # "M" atau "Q"
+
+    # 🔥 Mapping transform
+    transform_map = {
+        ("M", "qtoq"): monthly_to_quarterly,
+        ("M", "yony"): monthly_to_quarterly,
+        ("M", "ctoc"): monthly_to_quarterly,
+    }
+
+    # 🔥 Mapping compute function
+    compute_map = {
+        "qtoq": compute_qtoq,
+        "mtom": compute_qtoq,
+        "yony": compute_yony,
+        "yony_m": compute_yony,
+        "ctoc": compute_ctoc,
+        "ytod": compute_ctoc,
+        "annual": compute_annual,
+    }
+
+    # default result
+    result = []
+
+    # 🔥 Step 1: transform data kalau perlu
+    transform_fn = transform_map.get((period_type, type))
+    processed_data = transform_fn(data) if transform_fn else data
+
+    # 🔥 Step 2: ambil compute function
+    compute_fn = compute_map.get(type)
+
+    if compute_fn:
+        # special case annual (nggak butuh transform logic tambahan)
+        result = compute_fn(processed_data)
+
+    return {
+        "kode": kode,
+        "type": type,
+        "data": result,
+    }
 
 
 def get_quarter_data(db: Session, kode: str):
-    data = repo.query_timeseries(db, kode, None, None)
+    data = repo.query_timeseries(db, kode)
     if not data:
         return {"kode": kode, "data": []}
     result = monthly_to_quarterly(data)
@@ -120,7 +167,7 @@ def get_quarter_data(db: Session, kode: str):
 
 
 def get_annual_data(db: Session, kode: str):
-    data = repo.query_timeseries(db, kode, None, None)
+    data = repo.query_timeseries(db, kode)
     if not data:
         return {"kode": kode, "data": []}
     konversi = data[0].konversi  # ✅ ambil sekali
@@ -136,7 +183,7 @@ def get_annual_data(db: Session, kode: str):
             nilai = sum(values)
         elif konversi == "AVG":
             nilai = sum(values) / len(values)
-        elif konversi == "last":
+        elif konversi == "LAST":
             # ambil periode terakhir dalam tahun
             last_item = sorted(items, key=lambda x: x.periode)[-1]
             nilai = last_item.nilai
@@ -147,7 +194,7 @@ def get_annual_data(db: Session, kode: str):
 
 
 def get_chart_data(db: Session, kode: str):
-    data = repo.query_timeseries(db, kode, None, None)
+    data = repo.query_timeseries(db, kode)
     periode = []
     values = []
     for d in data:
