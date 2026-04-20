@@ -17,6 +17,7 @@ class Pdb(Base):
     id = Column(Integer, primary_key=True, index=True)
     kode = Column(Integer, index=True, nullable=False)
     deskripsi = Column(String, nullable=False)
+    satuan = Column(String, nullable=False)
     jenis = Column(String(4), index=True, nullable=False)
     tahun = Column(Integer, index=True, nullable=False)
     freq = Column(String(1), index=True, nullable=False)  # M / Q / Y

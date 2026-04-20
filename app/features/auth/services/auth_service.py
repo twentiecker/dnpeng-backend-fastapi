@@ -11,19 +11,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def register_user(db: Session, name: str, email: str, password: str):
+def register_user(db: Session, name: str, email: str, password: str, role: str):
     if repo.get_user_by_email(db, email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
+    # user = User(
+    #     name=name,
+    #     email=email,
+    #     hashed_password=hash_password(password),
+    #     role="user",
+    #     is_active=True,
+    # )
+    # logger.info(f"New user registered: {email}")
+
     user = User(
         name=name,
         email=email,
         hashed_password=hash_password(password),
-        role="user",
+        role=role,
         is_active=True,
     )
-    logger.info(f"New user registered: {email}")
+
+    logger.info(f"New user registered: {email} with role {role}")
     return repo.create_user(db, user)
 
 

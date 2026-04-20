@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -16,6 +16,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             msg = err["msg"]
         errors.append({"field": field, "message": msg})
     return JSONResponse(
-        status_code=422,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"success": False, "errors": errors},
     )

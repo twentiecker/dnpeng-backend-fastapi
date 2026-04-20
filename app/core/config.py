@@ -23,12 +23,15 @@ class Settings(BaseSettings):
     BASE_PATH_CPANEL: str = "/home/devdnpen/api-suplemen/public/files"
     ALLOWED_CATEGORIES: List[str] = [
         "intl",
+        "bca",
+        "djsef",
         "bri",
         "lps",
         "indef",
-        "bca",
+        "danamon",
         "mandiri",
         "pefindo",
+        "kemenko",
         "kemenkeu",
         "bi",
         "samuel",

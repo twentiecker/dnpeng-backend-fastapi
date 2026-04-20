@@ -151,9 +151,12 @@ def compute_ctoc(data):
 
 
 def compute_annual(data):
+    result = []
+    konversi = data[0].konversi
+    if konversi == "NaN":
+        return result  # skip semua
     ctoc = compute_ctoc(data)
     shift = detect_shift(data)
-    result = []
     for row in ctoc:
         if row["periode"].endswith(str(shift)):
             result.append(
