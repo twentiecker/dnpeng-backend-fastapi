@@ -6,3 +6,4 @@ from app.models.pmtb import Pmtb
 from app.models.eksim import Eksim
 from app.models.pdb import Pdb
 from app.models.files import Files
+from app.models.monitoring import Monitoring
