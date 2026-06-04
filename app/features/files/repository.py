@@ -6,6 +6,10 @@ def get_all_files(db: Session):
     return db.query(Files).all()
 
 
+def get_files_category(category: str, db: Session):
+    return db.query(Files).filter(Files.jenis_file == category).all()
+
+
 def save(db: Session, data: dict):
     file = Files(**data)
     db.add(file)

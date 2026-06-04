@@ -73,3 +73,16 @@ def logout_user(db: Session, access_token: str, refresh_token: str):
     email = payload.get("sub")
     logger.info(f"User logout: {email}")
     return {"message": "Successfully logged out"}
+
+
+def delete_user(db: Session, email: str):
+    user = repo.get_user_by_email(db, email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    repo.delete_user(db, user)
+
+    logger.info(f"Deleted user: {user.name} | {email}")
+    return {"message": "User deleted successfully"}

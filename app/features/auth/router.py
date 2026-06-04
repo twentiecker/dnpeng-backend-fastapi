@@ -53,3 +53,8 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
 @router.post("/logout")
 def logout(data: LogoutRequest, db: Session = Depends(get_db)):
     return auth_service.logout_user(db, data.access_token, data.refresh_token)
+
+
+@router.delete("/delete/{email}")
+def delete_user(email: str, db: Session = Depends(get_db)):
+    return auth_service.delete_user(db, email)

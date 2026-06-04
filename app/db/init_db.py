@@ -15,3 +15,36 @@ def seed_superadmin():
         db.add(admin)
         db.commit()
     db.close()
+
+
+def seed_multiple_superadmin():
+    db = SessionLocal()
+
+    users = [
+        {
+            "name": "Lukman",
+            "email": "arifandhi@bps.go.id",
+            "password": "NHAgustina@55874",
+            "role": "admin",
+        },
+        {
+            "name": "Nur Hafizah",
+            "email": "nhagustina@bps.go.id",
+            "password": "jaya5ada",
+            "role": "admin",
+        },
+    ]
+
+    for u in users:
+        existing_user = db.query(User).filter(User.email == u["email"]).first()
+        if not existing_user:
+            new_user = User(
+                name=u["name"],
+                email=u["email"],
+                hashed_password=hash_password(u["password"]),
+                role=u["role"],
+            )
+            db.add(new_user)
+
+    db.commit()
+    db.close()

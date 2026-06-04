@@ -3,6 +3,8 @@ from typing import List
 
 
 class Settings(BaseSettings):
+    ENV: str
+
     APP_NAME: str
     SECRET_KEY: str
     ALGORITHM: str
@@ -20,7 +22,7 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
 
     BASE_PATH: str = "public/files"
-    BASE_PATH_CPANEL: str = "/home/devdnpen/api-suplemen/public/files"
+    BASE_PATH_CPANEL: str = "/home/apidnpen/api-suplemen/public/files"
     ALLOWED_CATEGORIES: List[str] = [
         "intl",
         "bca",

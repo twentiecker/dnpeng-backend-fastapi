@@ -16,8 +16,9 @@ import time
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.exceptions import validation_exception_handler
-from app.core.static import setup_static
-from app.db.init_db import seed_superadmin
+
+# from app.core.static import setup_static
+from app.db.init_db import seed_superadmin, seed_multiple_superadmin
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI):
     logging.info("FastAPI application starting")
     seed_superadmin()
+    seed_multiple_superadmin()
     yield
     logging.info("FastAPI application shutting down")
 
@@ -81,7 +83,7 @@ app = FastAPI(
 # Static Files (Public Assets)
 # comment saat deploy di cpanel
 # -----------------------------
-setup_static(app)
+# setup_static(app)
 
 
 # -----------------------------
@@ -159,7 +161,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # -----------------------------
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "service": "Suplemen API"}
 
 
 # -----------------------------
@@ -167,4 +169,4 @@ def health():
 # -----------------------------
 @app.get("/")
 def root():
-    return {"message": "FastAPI Backend Running"}
+    return {"message": "Suplemen API Running"}

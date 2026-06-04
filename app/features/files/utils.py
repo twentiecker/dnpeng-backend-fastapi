@@ -55,6 +55,15 @@ def generate_filename(filename: str, tanggal_rilis: str):
     return f"{name}_{tanggal_rilis}{ext}"
 
 
+def sanitize_filename(filename: str):
+    name, ext = os.path.splitext(filename)
+    # 🔥 hapus karakter berbahaya, tapi tetap izinkan spasi
+    name = re.sub(r"[^a-zA-Z0-9_.\- ]", "", name)
+    # rapikan spasi (optional: hilangkan spasi berlebih)
+    name = re.sub(r"\s+", " ", name).strip()
+    return f"{name}{ext.lower()}"
+
+
 def save_file(file: UploadFile, jenis_file: str, tanggal_rilis: str):
     validate_file_extension(file.filename)
     validate_date_format(tanggal_rilis)
@@ -64,7 +73,11 @@ def save_file(file: UploadFile, jenis_file: str, tanggal_rilis: str):
     # buat folder kalau belum ada
     os.makedirs(folder_path, exist_ok=True)
 
-    new_filename = generate_filename(file.filename.replace("_", " "), tanggal_rilis)
+    safe_original_name = sanitize_filename(file.filename)
+
+    new_filename = generate_filename(
+        safe_original_name.replace("_", " "), tanggal_rilis
+    )
     file_path = os.path.join(folder_path, new_filename)
 
     with open(file_path, "wb") as buffer:

@@ -11,3 +11,9 @@ def create_user(db: Session, user: User):
     db.commit()
     db.refresh(user)
     return user
+
+
+def delete_user(db: Session, user: User):
+    db.delete(user)
+    db.commit()
+    return user
