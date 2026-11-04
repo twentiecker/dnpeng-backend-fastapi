@@ -17,6 +17,7 @@ def create_pkp(db: Session, data: Pkp):
 
 def filter_pkp(
     db: Session,
+    kode_wilayah: str,
     kode: str | None = None,
     tahun: int | None = None,
     freq: str | None = None,
@@ -31,18 +32,28 @@ def filter_pkp(
         query = query.filter(Pkp.freq == freq)
     if period:
         query = query.filter(Pkp.period == period)
-    return query.order_by(Pkp.tahun, Pkp.period).all()
+    return (
+        query.filter(Pkp.kode_wilayah == kode_wilayah)
+        .order_by(Pkp.tahun, Pkp.period)
+        .all()
+    )
 
 
-def get_pkp_by_kode(db: Session, kode: str):
-    return db.query(Pkp).filter(Pkp.kode == kode).order_by(Pkp.tahun, Pkp.period).all()
+def get_pkp_by_kode(db: Session, kode_wilayah: str, kode: str):
+    return (
+        db.query(Pkp)
+        .filter(Pkp.kode_wilayah == kode_wilayah, Pkp.kode == kode)
+        .order_by(Pkp.tahun, Pkp.period)
+        .all()
+    )
 
 
-def get_pkp_by_periode(db: Session, periode: str):
+def get_pkp_by_periode(db: Session, kode_wilayah: str, periode: str):
     tahun, freq, period = parse_periode(periode)
     return (
         db.query(Pkp)
         .filter(
+            Pkp.kode_wilayah == kode_wilayah,
             Pkp.tahun == tahun,
             Pkp.freq == freq,
             Pkp.period == period,
@@ -53,11 +64,12 @@ def get_pkp_by_periode(db: Session, periode: str):
 
 def query_timeseries(
     db: Session,
+    kode_wilayah: str,
     kode: str,
     start_year: str | None = None,
     end_year: str | None = None,
 ):
-    query = db.query(Pkp).filter(Pkp.kode == kode)
+    query = db.query(Pkp).filter(Pkp.kode_wilayah == kode_wilayah, Pkp.kode == kode)
     if start_year:
         tahun, freq, period = parse_periode(start_year)
         query = query.filter(
@@ -79,19 +91,35 @@ def query_timeseries(
     return query.order_by(Pkp.tahun, Pkp.period).all()
 
 
-def get_indikator_list(db: Session):
-    return db.query(Pkp.kode, Pkp.deskripsi).distinct().order_by(Pkp.kode).all()
+def get_indikator_list(db: Session, kode_wilayah: str):
+    return (
+        db.query(Pkp.kode, Pkp.deskripsi)
+        .filter(Pkp.kode_wilayah == kode_wilayah)
+        .distinct()
+        .order_by(Pkp.kode)
+        .all()
+    )
 
 
-def get_latest(db: Session):
-    sub = db.query(
-        Pkp.id,
-        func.row_number()
-        .over(
-            partition_by=(Pkp.kode, Pkp.freq),
-            order_by=(Pkp.tahun.desc(), Pkp.period.desc()),
+def get_latest(db: Session, kode_wilayah: str):
+    sub = (
+        db.query(
+            Pkp.id,
+            func.row_number()
+            .over(
+                partition_by=(Pkp.kode, Pkp.freq),
+                order_by=(Pkp.tahun.desc(), Pkp.period.desc()),
+            )
+            .label("rn"),
         )
-        .label("rn"),
-    ).subquery()
-    data = db.query(Pkp).join(sub, Pkp.id == sub.c.id).filter(sub.c.rn == 1).all()
+        .filter(Pkp.kode_wilayah == kode_wilayah)
+        .subquery()
+    )
+    data = (
+        db.query(Pkp)
+        .join(sub, Pkp.id == sub.c.id)
+        .filter(sub.c.rn == 1)
+        .order_by(Pkp.kode)
+        .all()
+    )
     return data

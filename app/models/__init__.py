@@ -7,3 +7,8 @@ from app.models.eksim import Eksim
 from app.models.pdb import Pdb
 from app.models.files import Files
 from app.models.monitoring import Monitoring
+from app.models.comment import Comment
+from app.models.project import Project
+from app.models.project_document import ProjectDocument
+from app.models.master_wilayah import MasterWilayah
+from app.models.project_member import ProjectMember

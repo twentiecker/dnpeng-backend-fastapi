@@ -10,6 +10,7 @@ class KonversiEnum(str, Enum):
 
 
 class PkrtCreate(BaseModel):
+    kode_wilayah: str
     kode: str
     deskripsi: str
     satuan: str
@@ -72,3 +73,45 @@ class PkrtResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ======================================================
+# Schema Agregator
+# ======================================================
+class AggregatorSeries(BaseModel):
+    periods: list[str]
+    data: list[float | None]
+
+
+class AggregatorIndicator(BaseModel):
+    kode: str
+    deskripsi: str
+    satuan: str
+    freq: str
+    konversi: str
+
+
+class AggregatorSeriesGroup(BaseModel):
+    monthly: AggregatorSeries
+    quarterly: AggregatorSeries
+    yearly: AggregatorSeries
+
+
+class AggregatorGrowthGroup(BaseModel):
+    mtom: AggregatorSeries
+    yony_m: AggregatorSeries
+    ytod: AggregatorSeries
+    qtoq: AggregatorSeries
+    yony: AggregatorSeries
+    ctoc: AggregatorSeries
+    annual: AggregatorSeries
+
+
+class AggregatorItem(BaseModel):
+    indikator: AggregatorIndicator
+    series: AggregatorSeriesGroup
+    growth: AggregatorGrowthGroup
+
+
+class PkrtAggregatorResponse(BaseModel):
+    data: dict[str, AggregatorItem]

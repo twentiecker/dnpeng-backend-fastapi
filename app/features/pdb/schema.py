@@ -1,13 +1,17 @@
+from app.features.master_wilayah.schema import MiniWilayahResponse
 from pydantic import BaseModel, field_validator
 import re
 
 
 class PdbCreate(BaseModel):
+    kode_wilayah: str
     kode: int
     deskripsi: str
+    satuan: str
+    konversi: str
+    jenis: str
     periode: str
     nilai: float
-    jenis: str
 
     @field_validator("kode")
     def validate_kode(cls, v):
@@ -49,9 +53,12 @@ class PdbCreate(BaseModel):
 class PdbResponse(BaseModel):
     kode: int
     deskripsi: str
+    satuan: str
+    konversi: str
+    jenis: str
     periode: str
     nilai: float
-    jenis: str
+    # wilayah: MiniWilayahResponse
 
     class Config:
         from_attributes = True

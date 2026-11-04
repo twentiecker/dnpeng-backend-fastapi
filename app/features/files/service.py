@@ -172,7 +172,13 @@ def get_files_by_category(category: str, db: Session):
 #     return data
 
 
-def upload_document(file: UploadFile, jenis_file: str, tanggal_rilis: str, db: Session):
+def upload_document(
+    file: UploadFile,
+    jenis_file: str,
+    tanggal_rilis: str,
+    db: Session,
+    register_file: bool = True,
+):
     file_path = None
 
     try:
@@ -186,13 +192,15 @@ def upload_document(file: UploadFile, jenis_file: str, tanggal_rilis: str, db: S
             "size": result["size"],
         }
 
-        save(db, data)
-        db.commit()
+        if register_file:
+            save(db, data)
+            db.commit()
 
         return data
 
     except Exception as e:
-        db.rollback()
+        if register_file:
+            db.rollback()
 
         # 🔥 hapus file kalau DB gagal
         if file_path and os.path.exists(file_path):

@@ -59,6 +59,12 @@ def login_user(db: Session, email: str, password: str, ip: str):
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+        },
     }
 
 

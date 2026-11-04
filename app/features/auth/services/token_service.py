@@ -76,6 +76,12 @@ def refresh_access_token(db: Session, refresh_token: str):
         "access_token": new_access_token,
         "refresh_token": new_refresh_token,
         "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+        },
     }
 
 

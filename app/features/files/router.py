@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 from urllib.parse import unquote
 from app.models.files import Files
+from app.models.user import User
 from app.features.files.schema import FileUploadResponse
 from app.features.files.service import (
     upload_document,
@@ -27,14 +28,16 @@ router = APIRouter()
 
 @router.post("/upload", response_model=FileUploadResponse)
 def upload_file(
-    user=Depends(get_current_user),
+    # user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     file: UploadFile = File(...),
     jenis_file: str = Form(...),
     tanggal_rilis: str = Form(...),
+    register_file: bool = Form(True),
     db: Session = Depends(get_db),
 ):
     try:
-        result = upload_document(file, jenis_file, tanggal_rilis, db)
+        result = upload_document(file, jenis_file, tanggal_rilis, db, register_file)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

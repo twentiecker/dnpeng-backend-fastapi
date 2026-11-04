@@ -17,6 +17,7 @@ def create_pmtb(db: Session, data: Pmtb):
 
 def filter_pmtb(
     db: Session,
+    kode_wilayah: str,
     kode: str | None = None,
     tahun: int | None = None,
     freq: str | None = None,
@@ -31,20 +32,28 @@ def filter_pmtb(
         query = query.filter(Pmtb.freq == freq)
     if period:
         query = query.filter(Pmtb.period == period)
-    return query.order_by(Pmtb.tahun, Pmtb.period).all()
-
-
-def get_pmtb_by_kode(db: Session, kode: str):
     return (
-        db.query(Pmtb).filter(Pmtb.kode == kode).order_by(Pmtb.tahun, Pmtb.period).all()
+        query.filter(Pmtb.kode_wilayah == kode_wilayah)
+        .order_by(Pmtb.tahun, Pmtb.period)
+        .all()
     )
 
 
-def get_pmtb_by_periode(db: Session, periode: str):
+def get_pmtb_by_kode(db: Session, kode_wilayah: str, kode: str):
+    return (
+        db.query(Pmtb)
+        .filter(Pmtb.kode_wilayah == kode_wilayah, Pmtb.kode == kode)
+        .order_by(Pmtb.tahun, Pmtb.period)
+        .all()
+    )
+
+
+def get_pmtb_by_periode(db: Session, kode_wilayah: str, periode: str):
     tahun, freq, period = parse_periode(periode)
     return (
         db.query(Pmtb)
         .filter(
+            Pmtb.kode_wilayah == kode_wilayah,
             Pmtb.tahun == tahun,
             Pmtb.freq == freq,
             Pmtb.period == period,
@@ -55,11 +64,12 @@ def get_pmtb_by_periode(db: Session, periode: str):
 
 def query_timeseries(
     db: Session,
+    kode_wilayah: str,
     kode: str,
     start_year: str | None = None,
     end_year: str | None = None,
 ):
-    query = db.query(Pmtb).filter(Pmtb.kode == kode)
+    query = db.query(Pmtb).filter(Pmtb.kode_wilayah == kode_wilayah, Pmtb.kode == kode)
     if start_year:
         tahun, freq, period = parse_periode(start_year)
         query = query.filter(
@@ -81,19 +91,29 @@ def query_timeseries(
     return query.order_by(Pmtb.tahun, Pmtb.period).all()
 
 
-def get_indikator_list(db: Session):
-    return db.query(Pmtb.kode, Pmtb.deskripsi).distinct().order_by(Pmtb.kode).all()
+def get_indikator_list(db: Session, kode_wilayah: str):
+    return (
+        db.query(Pmtb.kode, Pmtb.deskripsi)
+        .filter(Pmtb.kode_wilayah == kode_wilayah)
+        .distinct()
+        .order_by(Pmtb.kode)
+        .all()
+    )
 
 
-def get_latest(db: Session):
-    sub = db.query(
-        Pmtb.id,
-        func.row_number()
-        .over(
-            partition_by=(Pmtb.kode, Pmtb.freq),
-            order_by=(Pmtb.tahun.desc(), Pmtb.period.desc()),
+def get_latest(db: Session, kode_wilayah: str):
+    sub = (
+        db.query(
+            Pmtb.id,
+            func.row_number()
+            .over(
+                partition_by=(Pmtb.kode, Pmtb.freq),
+                order_by=(Pmtb.tahun.desc(), Pmtb.period.desc()),
+            )
+            .label("rn"),
         )
-        .label("rn"),
-    ).subquery()
+        .filter(Pmtb.kode_wilayah == kode_wilayah)
+        .subquery()
+    )
     data = db.query(Pmtb).join(sub, Pmtb.id == sub.c.id).filter(sub.c.rn == 1).all()
     return data

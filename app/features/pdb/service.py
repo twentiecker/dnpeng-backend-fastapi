@@ -5,7 +5,7 @@ from app.models.pdb import Pdb
 from app.features.pdb import repository as repo
 from app.services.timeseries import (
     parse_periode,
-    compute_qtoq,
+    compute_period_growth,
     compute_yony,
     compute_ctoc,
     compute_annual,
@@ -13,15 +13,26 @@ from app.services.timeseries import (
 
 
 def add_pdb(
-    db: Session, kode: int, deskripsi: str, jenis: str, periode: str, nilai: float
+    db: Session,
+    kode_wilayah: str,
+    kode: int,
+    deskripsi: str,
+    satuan: str,
+    konversi: str,
+    jenis: str,
+    periode: str,
+    nilai: float,
 ):
     try:
         tahun, freq, period = parse_periode(periode)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     data = Pdb(
+        kode_wilayah=kode_wilayah,
         kode=kode,
         deskripsi=deskripsi,
+        satuan=satuan,
+        konversi=konversi,
         jenis=jenis,
         tahun=tahun,
         freq=freq,
@@ -31,27 +42,38 @@ def add_pdb(
     return repo.create_pdb(db, data)
 
 
-def get_pdb_data(db: Session, kode: int | None, jenis: str | None, periode: str | None):
+def get_pdb_data(
+    db: Session,
+    kode_wilayah: str,
+    kode: int | None,
+    jenis: str | None,
+    periode: str | None,
+):
     tahun = None
     freq = None
     period = None
     if periode:
         tahun, freq, period = parse_periode(periode)
-    return repo.filter_pdb(db, kode, jenis, tahun, freq, period)
+    return repo.filter_pdb(db, kode_wilayah, kode, jenis, tahun, freq, period)
 
 
-def get_pdb_kode(db: Session, kode: int, jenis: str | None):
-    return repo.get_pdb_by_kode(db, kode, jenis)
+def get_pdb_kode(db: Session, kode_wilayah: str, kode: int, jenis: str | None):
+    return repo.get_pdb_by_kode(db, kode_wilayah, kode, jenis)
 
 
-def get_pdb_periode(db: Session, periode: str, jenis: str | None):
-    return repo.get_pdb_by_periode(db, periode, jenis)
+def get_pdb_periode(db: Session, kode_wilayah: str, periode: str, jenis: str | None):
+    return repo.get_pdb_by_periode(db, kode_wilayah, periode, jenis)
 
 
 def get_timeseries(
-    db: Session, kode: int, jenis: str | None, start: int | None, end: int | None
+    db: Session,
+    kode_wilayah: str,
+    kode: int,
+    jenis: str | None,
+    start: int | None,
+    end: int | None,
 ):
-    data = repo.query_timeseries(db, kode, jenis, start, end)
+    data = repo.query_timeseries(db, kode_wilayah, kode, jenis, start, end)
     return {
         "kode": kode,
         "jenis": jenis,
@@ -61,21 +83,21 @@ def get_timeseries(
     }
 
 
-def get_indikator_list(db: Session):
-    data = repo.get_indikator_list(db)
+def get_indikator_list(db: Session, kode_wilayah: str):
+    data = repo.get_indikator_list(db, kode_wilayah)
     return [{"kode": d.kode, "deskripsi": d.deskripsi} for d in data]
 
 
-def get_latest(db: Session, jenis: str | None):
-    return repo.get_latest(db, jenis)
+def get_latest(db: Session, kode_wilayah: str, jenis: str | None):
+    return repo.get_latest(db, kode_wilayah, jenis)
 
 
-def get_growth_rate(db: Session, kode: int, jenis: str, type: str):
-    data = repo.query_timeseries(db, kode, jenis)
+def get_growth_rate(db: Session, kode_wilayah: str, kode: int, jenis: str, type: str):
+    data = repo.query_timeseries(db, kode_wilayah, kode, jenis)
     if not data:
         return {"kode": kode, "type": type, "data": []}
     if type == "qtoq":
-        result = compute_qtoq(data)
+        result = compute_period_growth(data)
     elif type == "yony":
         result = compute_yony(data)
     elif type == "ctoc":
@@ -87,8 +109,8 @@ def get_growth_rate(db: Session, kode: int, jenis: str, type: str):
     return {"kode": kode, "jenis": jenis, "type": type, "data": result}
 
 
-def get_annual_data(db: Session, kode: int, jenis: str):
-    data = repo.query_timeseries(db, kode, jenis)
+def get_annual_data(db: Session, kode_wilayah: str, kode: int, jenis: str):
+    data = repo.query_timeseries(db, kode_wilayah, kode, jenis)
     annual = defaultdict(list)
     for d in data:
         year = d.periode[:4]
@@ -99,8 +121,8 @@ def get_annual_data(db: Session, kode: int, jenis: str):
     return {"kode": kode, "jenis": jenis, "data": result}
 
 
-def get_chart_data(db: Session, kode: int, jenis: str):
-    data = repo.query_timeseries(db, kode, jenis)
+def get_chart_data(db: Session, kode_wilayah: str, kode: int, jenis: str):
+    data = repo.query_timeseries(db, kode_wilayah, kode, jenis)
     periode = []
     values = []
     for d in data:
@@ -114,8 +136,8 @@ def get_chart_data(db: Session, kode: int, jenis: str):
     }
 
 
-def get_growth_chart(db: Session, kode: int, jenis: str, type: str):
-    result = get_growth_rate(db, kode, jenis, type)
+def get_growth_chart(db: Session, kode_wilayah: str, kode: int, jenis: str, type: str):
+    result = get_growth_rate(db, kode_wilayah, kode, jenis, type)
     periode = []
     nilai = []
     growth = []
@@ -141,8 +163,8 @@ def get_growth_chart(db: Session, kode: int, jenis: str, type: str):
     }
 
 
-def get_annual_chart(db: Session, kode: int, jenis: str):
-    result = get_annual_data(db, kode, jenis)
+def get_annual_chart(db: Session, kode_wilayah: str, kode: int, jenis: str):
+    result = get_annual_data(db, kode_wilayah, kode, jenis)
     tahun = []
     nilai = []
     for row in result["data"]:

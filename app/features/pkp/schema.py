@@ -1,3 +1,4 @@
+from app.features.master_wilayah.schema import MiniWilayahResponse
 from pydantic import BaseModel, field_validator
 from enum import Enum
 import re
@@ -10,6 +11,7 @@ class KonversiEnum(str, Enum):
 
 
 class PkpCreate(BaseModel):
+    kode_wilayah: str
     kode: str
     deskripsi: str
     satuan: str
@@ -72,3 +74,45 @@ class PkpResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ======================================================
+# Schema Agregator
+# ======================================================
+class AggregatorSeries(BaseModel):
+    periods: list[str]
+    data: list[float | None]
+
+
+class AggregatorIndicator(BaseModel):
+    kode: str
+    deskripsi: str
+    satuan: str
+    freq: str
+    konversi: str
+
+
+class AggregatorSeriesGroup(BaseModel):
+    monthly: AggregatorSeries
+    quarterly: AggregatorSeries
+    yearly: AggregatorSeries
+
+
+class AggregatorGrowthGroup(BaseModel):
+    mtom: AggregatorSeries
+    yony_m: AggregatorSeries
+    ytod: AggregatorSeries
+    qtoq: AggregatorSeries
+    yony: AggregatorSeries
+    ctoc: AggregatorSeries
+    annual: AggregatorSeries
+
+
+class AggregatorItem(BaseModel):
+    indikator: AggregatorIndicator
+    series: AggregatorSeriesGroup
+    growth: AggregatorGrowthGroup
+
+
+class PkpAggregatorResponse(BaseModel):
+    data: dict[str, AggregatorItem]

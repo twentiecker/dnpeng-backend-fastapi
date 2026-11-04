@@ -30,7 +30,7 @@ def get_by_filter(
     if komponen:
         query = query.filter(Monitoring.komponen == komponen)
 
-    return query.all()
+    return query.order_by(Monitoring.no).all()
 
 
 def create(db: Session, payload: dict):

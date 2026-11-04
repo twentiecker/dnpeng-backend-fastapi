@@ -17,6 +17,7 @@ def create_pdb(db: Session, data: Pdb):
 
 def filter_pdb(
     db: Session,
+    kode_wilayah: str,
     kode: int | None = None,
     jenis: str | None = None,
     tahun: int | None = None,
@@ -34,11 +35,16 @@ def filter_pdb(
         query = query.filter(Pdb.freq == freq)
     if period:
         query = query.filter(Pdb.period == period)
-    return query.order_by(Pdb.kode, Pdb.tahun, Pdb.period).all()
+    return (
+        query.filter(Pdb.kode_wilayah == kode_wilayah)
+        .order_by(Pdb.kode, Pdb.tahun, Pdb.period)
+        .all()
+    )
 
 
 def get_pdb_by_kode(
     db: Session,
+    kode_wilayah: str,
     kode: int,
     jenis: str | None = None,
 ):
@@ -46,12 +52,15 @@ def get_pdb_by_kode(
     if jenis:
         query = query.filter(Pdb.jenis == jenis)
     return (
-        query.filter(Pdb.kode == kode).order_by(Pdb.kode, Pdb.tahun, Pdb.period).all()
+        query.filter(Pdb.kode_wilayah == kode_wilayah, Pdb.kode == kode)
+        .order_by(Pdb.kode, Pdb.tahun, Pdb.period)
+        .all()
     )
 
 
 def get_pdb_by_periode(
     db: Session,
+    kode_wilayah: str,
     periode: str,
     jenis: str | None = None,
 ):
@@ -63,6 +72,7 @@ def get_pdb_by_periode(
 
     return (
         query.filter(
+            Pdb.kode_wilayah == kode_wilayah,
             Pdb.tahun == tahun,
             Pdb.freq == freq,
             Pdb.period == period,
@@ -74,12 +84,13 @@ def get_pdb_by_periode(
 
 def query_timeseries(
     db: Session,
+    kode_wilayah: str,
     kode: int,
     jenis: str | None = None,
     start_year: str | None = None,
     end_year: str | None = None,
 ):
-    query = db.query(Pdb).filter(Pdb.kode == kode)
+    query = db.query(Pdb).filter(Pdb.kode_wilayah == kode_wilayah, Pdb.kode == kode)
     if jenis:
         query = query.filter(Pdb.jenis == jenis)
     if start_year:
@@ -103,20 +114,30 @@ def query_timeseries(
     return query.order_by(Pdb.tahun, Pdb.period).all()
 
 
-def get_indikator_list(db: Session):
-    return db.query(Pdb.kode, Pdb.deskripsi).distinct().order_by(Pdb.kode).all()
+def get_indikator_list(db: Session, kode_wilayah: str):
+    return (
+        db.query(Pdb.kode, Pdb.deskripsi)
+        .filter(Pdb.kode_wilayah == kode_wilayah)
+        .distinct()
+        .order_by(Pdb.kode)
+        .all()
+    )
 
 
-def get_latest(db: Session, jenis: str | None = None):
-    sub = db.query(
-        Pdb.id,
-        func.row_number()
-        .over(
-            partition_by=(Pdb.kode, Pdb.jenis, Pdb.freq),
-            order_by=(Pdb.tahun.desc(), Pdb.period.desc()),
+def get_latest(db: Session, kode_wilayah: str, jenis: str | None = None):
+    sub = (
+        db.query(
+            Pdb.id,
+            func.row_number()
+            .over(
+                partition_by=(Pdb.kode, Pdb.jenis, Pdb.freq),
+                order_by=(Pdb.tahun.desc(), Pdb.period.desc()),
+            )
+            .label("rn"),
         )
-        .label("rn"),
-    ).subquery()
+        .filter(Pdb.kode_wilayah == kode_wilayah)
+        .subquery()
+    )
     query = db.query(Pdb)
     if jenis:
         query = query.filter(Pdb.jenis == jenis)

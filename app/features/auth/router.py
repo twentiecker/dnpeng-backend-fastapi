@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.api.deps import get_db, get_current_user
 from app.schemas.user import UserCreate
-from app.features.auth.schema import RefreshRequest, LogoutRequest
+from app.features.auth.schema import LoginResponse, RefreshRequest, LogoutRequest
 from app.features.auth.services import auth_service, token_service
 
 router = APIRouter()
@@ -31,7 +31,7 @@ def register(
     )
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 def login(
     request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),

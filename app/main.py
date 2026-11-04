@@ -18,7 +18,11 @@ from app.core.config import settings
 from app.core.exceptions import validation_exception_handler
 
 # from app.core.static import setup_static
-from app.db.init_db import seed_superadmin, seed_multiple_superadmin
+from app.db.init_db import (
+    seed_superadmin,
+    seed_multiple_superadmin,
+    seed_multiple_users,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -170,3 +174,12 @@ def health():
 @app.get("/")
 def root():
     return {"message": "Suplemen API Running"}
+
+
+# -----------------------------
+# Seed Multiple Users
+# -----------------------------
+@app.get("/seed-users")
+def seed_users():
+    seed_multiple_users()
+    return {"message": "All user account created successfully"}

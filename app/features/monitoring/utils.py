@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 MONTH_MAP = {
     "JAN": 1,
     "FEB": 2,
@@ -196,6 +195,77 @@ ON {join_cond}
 ORDER BY {order_by}
 """
     return query
+
+
+# ALLOWED_COLS = {
+#     "komponen",
+#     "nama_data",
+#     "internal_external",
+#     "pjk_neraca",
+#     "penanggung_jawab",
+#     "tahun",
+#     "triwulan",
+#     "freq",
+# }
+
+
+# def build_monitoring_progress_query(group_by_cols: list[str], triwulan=None):
+#     if not group_by_cols:
+#         raise ValueError("group_by_cols tidak boleh kosong")
+#     bad = [c for c in group_by_cols if c not in ALLOWED_COLS]
+#     if bad:
+#         raise ValueError(f"Kolom tidak diizinkan: {bad}")
+#     if triwulan not in (None, 1, 2, 3, 4):
+#         raise ValueError("triwulan harus 1-4 atau None")
+
+#     cols = ", ".join(group_by_cols)
+
+#     # kunci identitas data: kolom group-by + nama_data + tahun + triwulan
+#     key_cols = ", ".join(
+#         dict.fromkeys(group_by_cols + ["nama_data", "tahun", "triwulan"])
+#     )
+
+#     tw_filter = f"WHERE triwulan = {triwulan}" if triwulan else ""
+
+#     return f"""
+# WITH base AS (
+#     SELECT *,
+#            CEIL(bulan / 3.0)::int AS triwulan,
+#            (LOWER(freq) = 'annual') AS is_annual
+#     FROM monitoring
+# ),
+
+# -- 1 baris per (data, bulan): data kembar antar komponen dilebur
+# bulanan AS (
+#     SELECT {key_cols},
+#            bulan,
+#            BOOL_OR(is_annual) AS is_annual,
+#            MAX(jumlah_datum)  AS jumlah_datum,
+#            MAX(nilai)         AS nilai
+#     FROM base
+#     {tw_filter}
+#     GROUP BY {key_cols}, bulan
+# ),
+
+# -- 1 baris per (data, triwulan); annual tanpa nilai di TW itu dikeluarkan
+# per_tw AS (
+#     SELECT {key_cols},
+#            MAX(jumlah_datum) AS jumlah_datum,
+#            SUM(nilai)        AS nilai_tw
+#     FROM bulanan
+#     GROUP BY {key_cols}
+#     HAVING NOT BOOL_OR(is_annual) OR SUM(nilai) > 0
+# )
+
+# SELECT
+#     {cols},
+#     SUM(jumlah_datum) AS jumlah_target,
+#     SUM(nilai_tw)     AS jumlah_data_masuk,
+#     ROUND(100.0 * SUM(nilai_tw) / NULLIF(SUM(jumlah_datum), 0), 2) AS progress_persen
+# FROM per_tw
+# GROUP BY {cols}
+# ORDER BY {cols}
+# """
 
 
 def format_chart_data(rows, group_by_cols):

@@ -16,5 +16,7 @@ class TokenBlacklist(Base):
     token_type = Column(String, nullable=False)
     expired_at = Column(DateTime, nullable=False)
     created_at = Column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
