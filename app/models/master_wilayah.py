@@ -107,6 +107,17 @@ class MasterWilayah(Base):
         back_populates="wilayah",
         # lazy="selectin",
     )
+    # Relasi ke tabel PKLNPRT
+    pklnprt = relationship(
+        "Pklnprt",
+        back_populates="wilayah",
+    )
+
+    # Relasi ke tabel Inventori
+    inventori = relationship(
+        "Inventori",
+        back_populates="wilayah",
+    )
 
     __table_args__ = (
         UniqueConstraint(

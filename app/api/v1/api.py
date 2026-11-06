@@ -11,6 +11,8 @@ from app.features.monitoring import router as monitoring
 from app.features.comments import router as comments
 from app.features.projects import router as projects
 from app.features.master_wilayah import router as master_wilayah
+from app.features.pklnprt import router as pklnprt
+from app.features.inventori import router as inventori
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
@@ -24,6 +26,7 @@ api_router.include_router(files.router, prefix="/files", tags=["Files"])
 api_router.include_router(monitoring.router, prefix="/monitoring", tags=["Monitoring"])
 api_router.include_router(comments.router, prefix="/comments", tags=["Comments"])
 api_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
-api_router.include_router(
-    master_wilayah.router, prefix="/master-wilayah", tags=["Master Wilayah"]
+api_router.include_router(master_wilayah.router, prefix="/master-wilayah", tags=["Master Wilayah"])
+api_router.include_router(pklnprt.router, prefix="/pklnprt", tags=["PKLNPRT"])
+api_router.include_router(inventori.router, prefix="/inventori", tags=["inventori"]
 )
