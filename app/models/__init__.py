@@ -12,3 +12,5 @@ from app.models.project import Project
 from app.models.project_document import ProjectDocument
 from app.models.master_wilayah import MasterWilayah
 from app.models.project_member import ProjectMember
+from app.models.pklnprt import Pklnprt
+from app.models.inventori import Inventori
