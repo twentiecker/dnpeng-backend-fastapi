@@ -28,5 +28,5 @@ api_router.include_router(comments.router, prefix="/comments", tags=["Comments"]
 api_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 api_router.include_router(master_wilayah.router, prefix="/master-wilayah", tags=["Master Wilayah"])
 api_router.include_router(pklnprt.router, prefix="/pklnprt", tags=["PKLNPRT"])
-api_router.include_router(inventori.router, prefix="/inventori", tags=["inventori"]
+api_router.include_router(inventori.router, prefix="/inventori", tags=["Inventori"]
 )

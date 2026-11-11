@@ -11,13 +11,19 @@ from app.features.pkrt.schema import (
     PkrtResponse,
     PkrtAggregatorResponse,
 )
+from app.api.deps import get_db, get_current_user
+from app.models.user import User
 from app.features.pkrt import service
 
 router = APIRouter()
 
 
 @router.post("/data", response_model=PkrtResponse)
-def create_pkrt(data: PkrtCreate, db: Session = Depends(get_db)):
+def create_pkrt(data: PkrtCreate, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    
     return service.add_pkrt(
         db,
         data.kode_wilayah,
@@ -36,13 +42,19 @@ def pkrt_data(
     kode: Optional[str] = Query(None),
     periode: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_pkrt_data(db, kode_wilayah, kode, periode)
 
 
 @router.get("/kode", response_model=list[PkrtResponse])
-def pkrt_kode(kode_wilayah: str, kode: str, db: Session = Depends(get_db)):
+def pkrt_kode(
+    kode_wilayah: str, kode: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    ):
     return service.get_pkrt_kode(db, kode_wilayah, kode)
+
 
 
 @router.get("/periode", response_model=list[PkrtResponse])
