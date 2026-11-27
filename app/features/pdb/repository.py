@@ -18,7 +18,7 @@ def create_pdb(db: Session, data: Pdb):
 def filter_pdb(
     db: Session,
     kode_wilayah: str,
-    kode: int | None = None,
+    kode: str | None = None,
     jenis: str | None = None,
     tahun: int | None = None,
     freq: str | None = None,
@@ -85,7 +85,7 @@ def get_pdb_by_periode(
 def query_timeseries(
     db: Session,
     kode_wilayah: str,
-    kode: int,
+    kode: str,
     jenis: str | None = None,
     start_year: str | None = None,
     end_year: str | None = None,

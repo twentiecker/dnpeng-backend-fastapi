@@ -23,7 +23,9 @@ from app.db.init_db import (
     seed_multiple_superadmin,
     seed_multiple_users,
 )
-
+from app.db.session import engine
+from app.db.base import Base
+from app.models.user import User
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +63,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("FastAPI application starting")
+    
+    # TAMBAHKAN BLOK INI UNTUK MEMBUAT TABEL OTOMATIS
+    try:
+        Base.metadata.create_all(bind=engine)
+        logging.info("Database tables checked/created successfully.")
+    except Exception as e:
+        logging.error(f"Failed to create tables: {e}")
+        
     seed_superadmin()
     seed_multiple_superadmin()
     yield

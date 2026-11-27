@@ -12,6 +12,8 @@ from app.features.pklnprt.schema import (
     PklnprtAggregatorResponse,
 )
 from app.features.pklnprt import service
+from app.api.deps import get_db, get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -36,17 +38,22 @@ def pklnprt_data(
     kode: Optional[str] = Query(None),
     periode: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_pklnprt_data(db, kode_wilayah, kode, periode)
 
 
 @router.get("/kode", response_model=list[PklnprtResponse])
-def pklnprt_kode(kode_wilayah: str, kode: str, db: Session = Depends(get_db)):
+def pklnprt_kode(kode_wilayah: str, kode: str, db: Session = Depends(get_db),
+                   current_user: User = Depends(get_current_user),
+                   ):
     return service.get_pklnprt_kode(db, kode_wilayah, kode)
 
 
 @router.get("/periode", response_model=list[PklnprtResponse])
-def pklnprt_periode(kode_wilayah: str, periode: str, db: Session = Depends(get_db)):
+def pklnprt_periode(kode_wilayah: str, periode: str, db: Session = Depends(get_db),
+                      current_user: User = Depends(get_current_user),
+                      ):
     return service.get_pklnprt_periode(db, kode_wilayah, periode)
 
 
@@ -57,36 +64,53 @@ def pklnprt_timeseries(
     start: Optional[str] = None,
     end: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_timeseries(db, kode_wilayah, kode, start, end)
 
 
 @router.get("/indikator")
-def indikator_list(kode_wilayah: str, db: Session = Depends(get_db)):
+def indikator_list(kode_wilayah: str, db: Session = Depends(get_db),
+                   current_user: User = Depends(get_current_user),
+                   ):
     return service.get_indikator_list(db, kode_wilayah)
 
 
 @router.get("/latest", response_model=list[PklnprtResponse])
-def pklnprt_latest(kode_wilayah: str, db: Session = Depends(get_db)):
+def pklnprt_latest(kode_wilayah: str, db: Session = Depends(get_db),
+                     current_user: User = Depends(get_current_user),
+                     ):
     return service.get_latest(db, kode_wilayah)
 
 
 @router.get("/growth")
-def pklnprt_growth(kode_wilayah: str, kode: str, type: str, db: Session = Depends(get_db)):
+def pklnprt_growth(
+    kode_wilayah: str, kode: str, type: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return service.get_growth_rate(db, kode_wilayah, kode, type)
 
 @router.get("/quarter")
-def pklnprt_quarter(kode_wilayah: str, kode: str, db: Session = Depends(get_db)):
+def pklnprt_quarter(
+    kode_wilayah: str, kode: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    ):
     return service.get_quarter_data(db, kode_wilayah, kode)
 
 
 @router.get("/annual")
-def pklnprt_annual(kode_wilayah: str, kode: str, db: Session = Depends(get_db)):
+def pklnprt_annual(
+    kode_wilayah: str, kode: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    ):
     return service.get_annual_data(db, kode_wilayah, kode)
 
 
 @router.get("/chart")
-def pklnprt_chart(kode_wilayah: str, kode: str, db: Session = Depends(get_db)):
+def pklnprt_chart(
+    kode_wilayah: str, kode: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    ):
     return service.get_chart_data(db, kode_wilayah, kode)
 
 
@@ -96,6 +120,7 @@ def pklnprt_growth_chart(
     kode: str,
     type: str = "qtoq",
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_growth_chart(db, kode_wilayah, kode, type)
 
@@ -105,6 +130,7 @@ def pklnprt_quarter_chart(
     kode_wilayah: str,
     kode: str,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_quarter_chart(db, kode_wilayah, kode)
 
@@ -114,6 +140,7 @@ def pklnprt_annual_chart(
     kode_wilayah: str,
     kode: str,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_annual_chart(db, kode_wilayah, kode)
 
@@ -128,6 +155,7 @@ def pklnprt_annual_chart(
 def get_aggregated_data(
     kode_wilayah: str,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return service.get_aggregated_data(
         db,

@@ -15,7 +15,7 @@ from app.services.timeseries import (
 def add_pdb(
     db: Session,
     kode_wilayah: str,
-    kode: int,
+    kode: str,
     deskripsi: str,
     satuan: str,
     konversi: str,

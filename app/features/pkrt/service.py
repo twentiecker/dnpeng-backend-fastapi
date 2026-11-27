@@ -49,7 +49,8 @@ def get_pkrt_data(
     period = None
     if periode:
         tahun, freq, period = parse_periode(periode)
-    return repo.filter_pkrt(db, kode_wilayah, kode, tahun, freq, period)
+    hasil = repo.filter_pkrt(db, kode_wilayah, kode, tahun, freq, period)
+    return hasil
 
 
 def get_pkrt_kode(db: Session, kode_wilayah: str, kode: str):
