@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from collections import defaultdict
 from app.models.eksim import Eksim
 from app.features.eksim import repository as repo
@@ -38,7 +39,14 @@ def add_eksim(
         period=period,
         nilai=nilai,
     )
-    return repo.create_eksim(db, data)
+    try:
+        return repo.create_eksim(db, data)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Data dengan kombinasi kode_wilayah, kode, tahun, freq, dan period tersebut sudah ada.",
+        )
 
 
 def get_eksim_data(

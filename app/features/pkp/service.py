@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from collections import defaultdict
 from app.models.pkp import Pkp
 from app.features.pkp import repository as repo
@@ -38,7 +39,14 @@ def add_pkp(
         period=period,
         nilai=nilai,
     )
-    return repo.create_pkp(db, data)
+    try:
+        return repo.create_pkp(db, data)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Data dengan kombinasi kode_wilayah, kode, tahun, freq, dan period tersebut sudah ada.",
+        )
 
 
 def get_pkp_data(

@@ -155,7 +155,7 @@ def inventori_annual_chart(
 def get_aggregated_data(
     kode_wilayah: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_aggregated_data(
         db,

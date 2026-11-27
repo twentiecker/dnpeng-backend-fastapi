@@ -69,11 +69,12 @@ def pdb_periode(
 @router.get("/timeseries")
 def pdb_timeseries(
     kode_wilayah: str,
-    kode: str = Query(...),
+    kode: int = Query(...),
     jenis: Optional[str] = Query(None),
     start: Optional[str] = None,
     end: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return service.get_timeseries(db, kode_wilayah, kode, jenis, start, end)
 

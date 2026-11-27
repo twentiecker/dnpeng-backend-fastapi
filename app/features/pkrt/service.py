@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from collections import defaultdict
 from app.models.pkrt import Pkrt
 from app.features.pkrt import repository as repo
@@ -38,7 +39,14 @@ def add_pkrt(
         period=period,
         nilai=nilai,
     )
-    return repo.create_pkrt(db, data)
+    try:
+        return repo.create_pkrt(db, data)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Data dengan kombinasi kode_wilayah, kode, tahun, freq, dan period tersebut sudah ada.",
+        )
 
 
 def get_pkrt_data(

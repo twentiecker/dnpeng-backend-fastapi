@@ -5,7 +5,7 @@ import re
 
 class PdbCreate(BaseModel):
     kode_wilayah: str
-    kode: str
+    kode: int
     deskripsi: str
     satuan: str
     konversi: str
@@ -51,7 +51,7 @@ class PdbCreate(BaseModel):
 
 
 class PdbResponse(BaseModel):
-    kode: str
+    kode: int
     deskripsi: str
     satuan: str
     konversi: str

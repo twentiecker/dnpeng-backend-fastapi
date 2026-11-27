@@ -453,6 +453,65 @@
           "response": []
         },
         {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"kode_wilayah\": \"00\",\r\n  \"kode\": \"MX999\",\r\n  \"deskripsi\": \"Indeks Penjualan X999\",\r\n  \"satuan\": \"Indeks\",\r\n  \"konversi\": \"AVG\",\r\n  \"periode\": \"2099M1\",\r\n  \"nilai\": \"999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pkrt/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pkrt",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Data",
           "event": [
             {
@@ -1858,6 +1917,65 @@
           "response": []
         },
         {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nconst accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"kode_wilayah\": \"00\",\r\n    \"kode\": \"MX9999\",\r\n    \"deskripsi\": \"Daya Serap Pendapatan Negara Dan Hibah X999\",\r\n    \"satuan\": \"Persen\",\r\n    \"konversi\": \"SUM\",\r\n    \"periode\": \"2099M1\",\r\n    \"nilai\": 999999\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pkp/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pkp",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Data",
           "event": [
             {
@@ -2735,6 +2853,65 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"kode_wilayah\": \"00\",\r\n    \"kode\": \"QP999\",\r\n    \"deskripsi\": \"Realisasi Investasi PMDN\",\r\n    \"satuan\": \"Triliun Rupiah\",\r\n    \"konversi\": \"SUM\",\r\n    \"periode\": \"2019Q1\",\r\n    \"nilai\": 99999\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pmtb/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pmtb",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nconst accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
                 ]
               }
             }
@@ -3707,6 +3884,65 @@
           "response": []
         },
         {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nconst accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"kode_wilayah\": \"00\",\r\n    \"kode\": \"MI99999\",\r\n    \"deskripsi\": \"Nilai Ekspor Nonmigas\",\r\n    \"satuan\": \"Juta USD\",\r\n    \"konversi\": \"SUM\",\r\n    \"periode\": \"2020M12\",\r\n    \"nilai\": 99999.9\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/eksim/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "eksim",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Data",
           "event": [
             {
@@ -4628,6 +4864,65 @@
           "response": []
         },
         {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nconst accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"kode_wilayah\": \"00\",\r\n    \"kode\": 50000,\r\n    \"deskripsi\": \"5. Perubahan Inventori\",\r\n    \"satuan\": \"Miliar Rupiah\",\r\n    \"konversi\": \"SUM\",\r\n    \"jenis\": \"ADHB\",\r\n    \"periode\": \"2026Q4\",\r\n    \"nilai\": 99999999\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pdb/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pdb",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Data",
           "event": [
             {
@@ -4719,7 +5014,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pdb/kode?kode_wilayah=00&kode=10000&jenis=ADHB",
+              "raw": "{{base_url}}/api/v1/pdb/kode?kode_wilayah=00&kode=10000&jenis=ADHK",
               "host": [
                 "{{base_url}}"
               ],
@@ -4740,8 +5035,7 @@
                 },
                 {
                   "key": "jenis",
-                  "value": "ADHB",
-                  "description": "Optional (Jenis data, ex: ADHB, ADHK)"
+                  "value": "ADHK"
                 }
               ]
             }
@@ -5024,7 +5318,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const requestedKode = pm.request.url.query.get(\"kode\");\r\nconst requestedType = pm.request.url.query.get(\"type\");\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Content-Type is JSON\", function () {\r\n    pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.match(/application\\/json/i);\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"Response is a valid JSON object with matching kode and type\", function () {\r\n    pm.response.to.be.json;\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData).to.be.an(\"object\").and.not.be.an(\"array\");\r\n    pm.expect(jsonData.kode).to.eql(requestedKode);\r\n    pm.expect(jsonData.type).to.eql(requestedType);\r\n    pm.expect(jsonData).to.have.property(\"data\").that.is.an(\"array\");\r\n});"
+                  "const requestedKode = Number(pm.request.url.query.get(\"kode\"));\r\nconst requestedType = pm.request.url.query.get(\"type\");\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Content-Type is JSON\", function () {\r\n    pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.match(/application\\/json/i);\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});\r\n\r\npm.test(\"Response is a valid JSON object with matching kode and type\", function () {\r\n    pm.response.to.be.json;\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData).to.be.an(\"object\").and.not.be.an(\"array\");\r\n    pm.expect(jsonData.kode).to.eql(requestedKode);\r\n    pm.expect(jsonData.type).to.eql(requestedType);\r\n    pm.expect(jsonData).to.have.property(\"data\").that.is.an(\"array\");\r\n});"
                 ]
               }
             }
@@ -6545,14 +6839,73 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/data",
+              "raw": "{{base_url}}/api/v1/pklnprt/data",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Data (Duplicate - Expect Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"kode_wilayah\": \"00\",\r\n  \"kode\": \"MX999\",\r\n  \"deskripsi\": \"Indeks Penjualan PKLNPRT X999\",\r\n  \"satuan\": \"Indeks\",\r\n  \"konversi\": \"AVG\",\r\n  \"periode\": \"2099M1\",\r\n  \"nilai\": \"999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/pklnprt/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pklnprt",
                 "data"
               ]
             }
@@ -6607,14 +6960,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/data?kode_wilayah=00",
+              "raw": "{{base_url}}/api/v1/pklnprt/data?kode_wilayah=00",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "data"
               ],
               "query": [
@@ -6663,14 +7016,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/kode?kode_wilayah=00&kode=MA1014",
+              "raw": "{{base_url}}/api/v1/pklnprt/kode?kode_wilayah=00&kode=MA1014",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "kode"
               ],
               "query": [
@@ -6723,14 +7076,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/periode?kode_wilayah=00&periode=2025M12",
+              "raw": "{{base_url}}/api/v1/pklnprt/periode?kode_wilayah=00&periode=2025M12",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "periode"
               ],
               "query": [
@@ -6785,14 +7138,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/timeseries?kode_wilayah=00&kode=MA100&start=2024M1&end=2024M12",
+              "raw": "{{base_url}}/api/v1/pklnprt/timeseries?kode_wilayah=00&kode=MA100&start=2024M1&end=2024M12",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "timeseries"
               ],
               "query": [
@@ -6853,14 +7206,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/indikator?kode_wilayah=00",
+              "raw": "{{base_url}}/api/v1/pklnprt/indikator?kode_wilayah=00",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "indikator"
               ],
               "query": [
@@ -6909,14 +7262,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/latest?kode_wilayah=00",
+              "raw": "{{base_url}}/api/v1/pklnprt/latest?kode_wilayah=00",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "latest"
               ],
               "query": [
@@ -6935,101 +7288,19 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "const isFiniteNumber = (value) => typeof value === \"number\" && Number.isFinite(value);",
-                  "let jsonData;",
-                  "",
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Content-Type is JSON\", function () {",
-                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.match(/^application\\/json\\b/i);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is less than 1000 ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
-                  "});",
-                  "",
-                  "pm.test(\"Response is a valid JSON object\", function () {",
-                  "    pm.response.to.be.json;",
-                  "    jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.be.an(\"object\").and.not.be.an(\"array\");",
-                  "});",
-                  "",
-                  "pm.test(\"Top-level kode and type match request query values\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    pm.expect(jsonData.kode).to.eql(pm.request.url.query.get(\"kode\"));",
-                  "    pm.expect(jsonData.type).to.eql(pm.request.url.query.get(\"type\"));",
-                  "});",
-                  "",
-                  "pm.test(\"Data is a non-empty array\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property(\"data\").that.is.an(\"array\").and.is.not.empty;",
-                  "});",
-                  "",
-                  "pm.test(\"Each data item has periode, nilai, and growth\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    jsonData.data.forEach(function (item) {",
-                  "        pm.expect(item).to.be.an(\"object\");",
-                  "        pm.expect(item).to.have.all.keys(\"periode\", \"nilai\", \"growth\");",
-                  "    });",
-                  "});",
-                  "",
-                  "pm.test(\"Each periode matches YYYYQ1-4\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    jsonData.data.forEach(function (item) {",
-                  "        pm.expect(item.periode).to.match(/^\\d{4}Q[1-4]$/);",
-                  "    });",
-                  "});",
-                  "",
-                  "pm.test(\"Each nilai is a finite number\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    jsonData.data.forEach(function (item) {",
-                  "        pm.expect(isFiniteNumber(item.nilai)).to.be.true;",
-                  "    });",
-                  "});",
-                  "",
-                  "pm.test(\"Each growth is null or a finite number\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    jsonData.data.forEach(function (item) {",
-                  "        pm.expect(item.growth === null || isFiniteNumber(item.growth)).to.be.true;",
-                  "    });",
-                  "});",
-                  "",
-                  "pm.test(\"First growth is null\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    pm.expect(jsonData.data[0].growth).to.be.null;",
-                  "});",
-                  "",
-                  "pm.test(\"All later growth values are finite numbers\", function () {",
-                  "    jsonData = jsonData || pm.response.json();",
-                  "    jsonData.data.slice(1).forEach(function (item) {",
-                  "        pm.expect(isFiniteNumber(item.growth)).to.be.true;",
-                  "    });",
-                  "});"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const isFiniteNumber = (value) => typeof value === \"number\" && Number.isFinite(value);\nlet jsonData;\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type is JSON\", function () {\n    pm.expect(pm.response.headers.get(\"Content-Type\")).to.match(/^application\\/json\\b/i);\n});\n\npm.test(\"Response time is less than 1000 ms\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(1000);\n});\n\npm.test(\"Response is a valid JSON object\", function () {\n    pm.response.to.be.json;\n    jsonData = pm.response.json();\n    pm.expect(jsonData).to.be.an(\"object\").and.not.be.an(\"array\");\n});\n\npm.test(\"Top-level kode and type match request query values\", function () {\n    jsonData = jsonData || pm.response.json();\n    pm.expect(jsonData.kode).to.eql(pm.request.url.query.get(\"kode\"));\n    pm.expect(jsonData.type).to.eql(pm.request.url.query.get(\"type\"));\n});\n\npm.test(\"Data is a non-empty array\", function () {\n    jsonData = jsonData || pm.response.json();\n    pm.expect(jsonData).to.have.property(\"data\").that.is.an(\"array\").and.is.not.empty;\n});\n\npm.test(\"Each data item has periode, nilai, and growth\", function () {\n    jsonData = jsonData || pm.response.json();\n    jsonData.data.forEach(function (item) {\n        pm.expect(item).to.be.an(\"object\");\n        pm.expect(item).to.have.all.keys(\"periode\", \"nilai\", \"growth\");\n    });\n});\n\npm.test(\"Each periode matches YYYYQ1-4\", function () {\n    jsonData = jsonData || pm.response.json();\n    jsonData.data.forEach(function (item) {\n        pm.expect(item.periode).to.match(/^\\d{4}Q[1-4]$/);\n    });\n});\n\npm.test(\"Each nilai is a finite number\", function () {\n    jsonData = jsonData || pm.response.json();\n    jsonData.data.forEach(function (item) {\n        pm.expect(isFiniteNumber(item.nilai)).to.be.true;\n    });\n});\n\npm.test(\"Each growth is null or a finite number\", function () {\n    jsonData = jsonData || pm.response.json();\n    jsonData.data.forEach(function (item) {\n        pm.expect(item.growth === null || isFiniteNumber(item.growth)).to.be.true;\n    });\n});\n\npm.test(\"First growth is null\", function () {\n    jsonData = jsonData || pm.response.json();\n    pm.expect(jsonData.data[0].growth).to.be.null;\n});\n\npm.test(\"All later growth values are finite numbers\", function () {\n    jsonData = jsonData || pm.response.json();\n    jsonData.data.slice(1).forEach(function (item) {\n        pm.expect(isFiniteNumber(item.growth)).to.be.true;\n    });\n});"
+                ]
               }
             },
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r",
-                  "var accessToken = pm.environment.get(\"access_token\");\r",
-                  "\r",
-                  "if (!accessToken || accessToken.trim() === \"\") {\r",
-                  "    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r",
-                  "} else {\r",
-                  "    console.log(\"access_token siap digunakan.\");\r",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
               }
             }
           ],
@@ -7047,14 +7318,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/growth?kode_wilayah=00&kode=MA1014&type=qtoq",
+              "raw": "{{base_url}}/api/v1/pklnprt/growth?kode_wilayah=00&kode=MA1014&type=qtoq",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "growth"
               ],
               "query": [
@@ -7082,94 +7353,19 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r",
-                  "var accessToken = pm.environment.get(\"access_token\");\r",
-                  "\r",
-                  "if (!accessToken || accessToken.trim() === \"\") {\r",
-                  "    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r",
-                  "} else {\r",
-                  "    console.log(\"access_token siap digunakan.\");\r",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
               }
             },
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "const statusCode = pm.response.code;",
-                  "const requestedKode = pm.request.url.query.get('kode');",
-                  "const requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');",
-                  "let jsonData;",
-                  "",
-                  "pm.test('Status code sesuai skenario', function () {",
-                  "    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);",
-                  "});",
-                  "",
-                  "pm.test('Respons berupa JSON yang valid', function () {",
-                  "    pm.expect(function () {",
-                  "        jsonData = pm.response.json();",
-                  "    }).not.to.throw();",
-                  "});",
-                  "",
-                  "if ([200, 201].includes(statusCode)) {",
-                  "    pm.test('Status sukses adalah 200 OK atau 201 Created', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([200, 201]);",
-                  "    });",
-                  "",
-                  "    pm.test('Respons mencerminkan parameter query yang diminta', function () {",
-                  "        if (jsonData && Object.prototype.hasOwnProperty.call(jsonData, 'kode')) {",
-                  "            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));",
-                  "        }",
-                  "        if (jsonData && Object.prototype.hasOwnProperty.call(jsonData, 'kode_wilayah')) {",
-                  "            pm.expect(String(jsonData.kode_wilayah)).to.eql(String(requestedKodeWilayah));",
-                  "        }",
-                  "    });",
-                  "",
-                  "    pm.test('Respons sukses memiliki struktur data array', function () {",
-                  "        pm.expect(jsonData).to.be.an('object');",
-                  "        pm.expect(jsonData).to.have.property('data').that.is.an('array');",
-                  "    });",
-                  "",
-                  "    if (jsonData && Array.isArray(jsonData.data) && jsonData.data.length === 0) {",
-                  "        pm.test('Kode tidak dikenal mengembalikan array kosong dan echo kode', function () {",
-                  "            pm.expect(statusCode).to.eql(200);",
-                  "            pm.expect(jsonData.data).to.eql([]);",
-                  "            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));",
-                  "        });",
-                  "    }",
-                  "}",
-                  "",
-                  "if (statusCode === 401) {",
-                  "    pm.test('Token kosong/tidak valid mengembalikan 401 Unauthorized, bukan 500', function () {",
-                  "        pm.expect(statusCode).to.eql(401);",
-                  "        pm.expect(statusCode).not.to.eql(500);",
-                  "    });",
-                  "}",
-                  "",
-                  "if ([400, 422].includes(statusCode)) {",
-                  "    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([400, 422]);",
-                  "    });",
-                  "",
-                  "    pm.test('Respons error memiliki pesan detail', function () {",
-                  "        pm.expect(jsonData).to.be.an('object');",
-                  "        const detail = jsonData.detail || jsonData.message || jsonData.error || jsonData.errors;",
-                  "        pm.expect(detail, 'detail/message/error/errors').to.exist;",
-                  "    });",
-                  "}",
-                  "",
-                  "pm.test('Server tidak mengembalikan internal error 500', function () {",
-                  "    pm.expect(statusCode).not.to.eql(500);",
-                  "});"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const statusCode = pm.response.code;\nconst requestedKode = pm.request.url.query.get('kode');\nconst requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');\nlet jsonData;\n\npm.test('Status code sesuai skenario', function () {\n    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);\n});\n\npm.test('Respons berupa JSON yang valid', function () {\n    pm.expect(function () {\n        jsonData = pm.response.json();\n    }).not.to.throw();\n});\n\nif ([200, 201].includes(statusCode)) {\n    pm.test('Status sukses adalah 200 OK atau 201 Created', function () {\n        pm.expect(statusCode).to.be.oneOf([200, 201]);\n    });\n\n    pm.test('Respons mencerminkan parameter query yang diminta', function () {\n        if (jsonData && Object.prototype.hasOwnProperty.call(jsonData, 'kode')) {\n            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));\n        }\n        if (jsonData && Object.prototype.hasOwnProperty.call(jsonData, 'kode_wilayah')) {\n            pm.expect(String(jsonData.kode_wilayah)).to.eql(String(requestedKodeWilayah));\n        }\n    });\n\n    pm.test('Respons sukses memiliki struktur data array', function () {\n        pm.expect(jsonData).to.be.an('object');\n        pm.expect(jsonData).to.have.property('data').that.is.an('array');\n    });\n\n    if (jsonData && Array.isArray(jsonData.data) && jsonData.data.length === 0) {\n        pm.test('Kode tidak dikenal mengembalikan array kosong dan echo kode', function () {\n            pm.expect(statusCode).to.eql(200);\n            pm.expect(jsonData.data).to.eql([]);\n            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));\n        });\n    }\n}\n\nif (statusCode === 401) {\n    pm.test('Token kosong/tidak valid mengembalikan 401 Unauthorized, bukan 500', function () {\n        pm.expect(statusCode).to.eql(401);\n        pm.expect(statusCode).not.to.eql(500);\n    });\n}\n\nif ([400, 422].includes(statusCode)) {\n    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {\n        pm.expect(statusCode).to.be.oneOf([400, 422]);\n    });\n\n    pm.test('Respons error memiliki pesan detail', function () {\n        pm.expect(jsonData).to.be.an('object');\n        const detail = jsonData.detail || jsonData.message || jsonData.error || jsonData.errors;\n        pm.expect(detail, 'detail/message/error/errors').to.exist;\n    });\n}\n\npm.test('Server tidak mengembalikan internal error 500', function () {\n    pm.expect(statusCode).not.to.eql(500);\n});"
+                ]
               }
             }
           ],
@@ -7187,14 +7383,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/quarter?kode_wilayah=00&kode=MA100",
+              "raw": "{{base_url}}/api/v1/pklnprt/quarter?kode_wilayah=00&kode=MA100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "quarter"
               ],
               "query": [
@@ -7217,94 +7413,19 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r",
-                  "var accessToken = pm.environment.get(\"access_token\");\r",
-                  "\r",
-                  "if (!accessToken || accessToken.trim() === \"\") {\r",
-                  "    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r",
-                  "} else {\r",
-                  "    console.log(\"access_token siap digunakan.\");\r",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
               }
             },
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "const statusCode = pm.response.code;",
-                  "const requestedKode = pm.request.url.query.get('kode');",
-                  "const requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');",
-                  "let jsonData;",
-                  "",
-                  "pm.test('Status code sesuai skenario', function () {",
-                  "    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);",
-                  "});",
-                  "",
-                  "pm.test('Respons berupa JSON yang valid', function () {",
-                  "    pm.expect(function () {",
-                  "        jsonData = pm.response.json();",
-                  "    }).not.to.throw();",
-                  "});",
-                  "",
-                  "if ([200, 201].includes(statusCode)) {",
-                  "    pm.test('Status sukses adalah 200 OK atau 201 Created', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([200, 201]);",
-                  "    });",
-                  "",
-                  "    pm.test('Respons mencerminkan parameter query yang diminta', function () {",
-                  "        if (Object.prototype.hasOwnProperty.call(jsonData, 'kode')) {",
-                  "            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));",
-                  "        }",
-                  "        if (Object.prototype.hasOwnProperty.call(jsonData, 'kode_wilayah')) {",
-                  "            pm.expect(String(jsonData.kode_wilayah)).to.eql(String(requestedKodeWilayah));",
-                  "        }",
-                  "    });",
-                  "",
-                  "    pm.test('Respons sukses memiliki struktur data array', function () {",
-                  "        pm.expect(jsonData).to.be.an('object');",
-                  "        pm.expect(jsonData).to.have.property('data').that.is.an('array');",
-                  "    });",
-                  "",
-                  "    if (Array.isArray(jsonData.data) && jsonData.data.length === 0) {",
-                  "        pm.test('Kode tidak dikenal mengembalikan 200, array kosong, dan echo kode', function () {",
-                  "            pm.expect(statusCode).to.eql(200);",
-                  "            pm.expect(jsonData.data).to.eql([]);",
-                  "            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));",
-                  "        });",
-                  "    }",
-                  "}",
-                  "",
-                  "if (statusCode === 401) {",
-                  "    pm.test('Token kosong/tidak valid mengembalikan 401 Unauthorized, bukan 500', function () {",
-                  "        pm.expect(statusCode).to.eql(401);",
-                  "        pm.expect(statusCode).not.to.eql(500);",
-                  "    });",
-                  "}",
-                  "",
-                  "if ([400, 422].includes(statusCode)) {",
-                  "    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([400, 422]);",
-                  "    });",
-                  "",
-                  "    pm.test('Respons error memiliki pesan detail', function () {",
-                  "        pm.expect(jsonData).to.be.an('object');",
-                  "        const detail = jsonData.detail || jsonData.message || jsonData.error || jsonData.errors;",
-                  "        pm.expect(detail, 'detail/message/error/errors').to.exist;",
-                  "    });",
-                  "}",
-                  "",
-                  "pm.test('Server tidak mengembalikan internal error 500', function () {",
-                  "    pm.expect(statusCode).not.to.eql(500);",
-                  "});"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const statusCode = pm.response.code;\nconst requestedKode = pm.request.url.query.get('kode');\nconst requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');\nlet jsonData;\n\npm.test('Status code sesuai skenario', function () {\n    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);\n});\n\npm.test('Respons berupa JSON yang valid', function () {\n    pm.expect(function () {\n        jsonData = pm.response.json();\n    }).not.to.throw();\n});\n\nif ([200, 201].includes(statusCode)) {\n    pm.test('Status sukses adalah 200 OK atau 201 Created', function () {\n        pm.expect(statusCode).to.be.oneOf([200, 201]);\n    });\n\n    pm.test('Respons mencerminkan parameter query yang diminta', function () {\n        if (Object.prototype.hasOwnProperty.call(jsonData, 'kode')) {\n            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));\n        }\n        if (Object.prototype.hasOwnProperty.call(jsonData, 'kode_wilayah')) {\n            pm.expect(String(jsonData.kode_wilayah)).to.eql(String(requestedKodeWilayah));\n        }\n    });\n\n    pm.test('Respons sukses memiliki struktur data array', function () {\n        pm.expect(jsonData).to.be.an('object');\n        pm.expect(jsonData).to.have.property('data').that.is.an('array');\n    });\n\n    if (Array.isArray(jsonData.data) && jsonData.data.length === 0) {\n        pm.test('Kode tidak dikenal mengembalikan 200, array kosong, dan echo kode', function () {\n            pm.expect(statusCode).to.eql(200);\n            pm.expect(jsonData.data).to.eql([]);\n            pm.expect(String(jsonData.kode)).to.eql(String(requestedKode));\n        });\n    }\n}\n\nif (statusCode === 401) {\n    pm.test('Token kosong/tidak valid mengembalikan 401 Unauthorized, bukan 500', function () {\n        pm.expect(statusCode).to.eql(401);\n        pm.expect(statusCode).not.to.eql(500);\n    });\n}\n\nif ([400, 422].includes(statusCode)) {\n    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {\n        pm.expect(statusCode).to.be.oneOf([400, 422]);\n    });\n\n    pm.test('Respons error memiliki pesan detail', function () {\n        pm.expect(jsonData).to.be.an('object');\n        const detail = jsonData.detail || jsonData.message || jsonData.error || jsonData.errors;\n        pm.expect(detail, 'detail/message/error/errors').to.exist;\n    });\n}\n\npm.test('Server tidak mengembalikan internal error 500', function () {\n    pm.expect(statusCode).not.to.eql(500);\n});"
+                ]
               }
             }
           ],
@@ -7322,14 +7443,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/annual?kode_wilayah=00&kode=MA100",
+              "raw": "{{base_url}}/api/v1/pklnprt/annual?kode_wilayah=00&kode=MA100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "annual"
               ],
               "query": [
@@ -7352,49 +7473,19 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r",
-                  "var accessToken = pm.environment.get(\"access_token\");\r",
-                  "\r",
-                  "if (!accessToken || accessToken.trim() === \"\") {\r",
-                  "    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r",
-                  "} else {\r",
-                  "    console.log(\"access_token siap digunakan.\");\r",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
               }
             },
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is less than 500ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
-                  "});",
-                  "",
-                  "pm.test(\"Response body is valid JSON\", function () {",
-                  "    pm.response.to.be.json;",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains expected fields\", function () {",
-                  "    const jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property(\"kode\");",
-                  "    pm.expect(jsonData).to.have.property(\"xAxis\");",
-                  "    pm.expect(jsonData).to.have.property(\"series\");",
-                  "    pm.expect(jsonData.series).to.be.an(\"array\");",
-                  "});",
-                  ""
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response time is less than 500ms\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(500);\n});\n\npm.test(\"Response body is valid JSON\", function () {\n    pm.response.to.be.json;\n});\n\npm.test(\"Response contains expected fields\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"kode\");\n    pm.expect(jsonData).to.have.property(\"xAxis\");\n    pm.expect(jsonData).to.have.property(\"series\");\n    pm.expect(jsonData.series).to.be.an(\"array\");\n});\n"
+                ]
               }
             }
           ],
@@ -7412,14 +7503,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/chart?kode_wilayah=00&kode=MA100",
+              "raw": "{{base_url}}/api/v1/pklnprt/chart?kode_wilayah=00&kode=MA100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "chart"
               ],
               "query": [
@@ -7442,51 +7533,19 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r",
-                  "var accessToken = pm.environment.get(\"access_token\");\r",
-                  "\r",
-                  "if (!accessToken || accessToken.trim() === \"\") {\r",
-                  "    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r",
-                  "} else {\r",
-                  "    console.log(\"access_token siap digunakan.\");\r",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
               }
             },
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is less than 500ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
-                  "});",
-                  "",
-                  "pm.test(\"Response body is valid JSON\", function () {",
-                  "    pm.response.to.be.json;",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains required fields\", function () {",
-                  "    const jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property(\"kode\");",
-                  "    pm.expect(jsonData).to.have.property(\"type\");",
-                  "    pm.expect(jsonData).to.have.property(\"xAxis\");",
-                  "    pm.expect(jsonData).to.have.property(\"series\");",
-                  "    pm.expect(Array.isArray(jsonData.xAxis)).to.be.true;",
-                  "    pm.expect(Array.isArray(jsonData.series)).to.be.true;",
-                  "});",
-                  ""
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response time is less than 500ms\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(500);\n});\n\npm.test(\"Response body is valid JSON\", function () {\n    pm.response.to.be.json;\n});\n\npm.test(\"Response contains required fields\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"kode\");\n    pm.expect(jsonData).to.have.property(\"type\");\n    pm.expect(jsonData).to.have.property(\"xAxis\");\n    pm.expect(jsonData).to.have.property(\"series\");\n    pm.expect(Array.isArray(jsonData.xAxis)).to.be.true;\n    pm.expect(Array.isArray(jsonData.series)).to.be.true;\n});\n"
+                ]
               }
             }
           ],
@@ -7504,14 +7563,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/growth/chart?kode_wilayah=00&kode=MA100&type=ctoc",
+              "raw": "{{base_url}}/api/v1/pklnprt/growth/chart?kode_wilayah=00&kode=MA100&type=ctoc",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "growth",
                 "chart"
               ],
@@ -7540,34 +7599,10 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is less than 500ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
-                  "});",
-                  "",
-                  "pm.test(\"Response body is valid JSON and contains expected fields\", function () {",
-                  "    const jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property(\"kode\");",
-                  "    pm.expect(jsonData).to.have.property(\"xAxis\");",
-                  "    pm.expect(jsonData).to.have.property(\"series\");",
-                  "    pm.expect(jsonData.series).to.be.an(\"array\");",
-                  "});",
-                  ""
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "packages": {},
-                "type": "text/javascript"
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response time is less than 500ms\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(500);\n});\n\npm.test(\"Response body is valid JSON and contains expected fields\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"kode\");\n    pm.expect(jsonData).to.have.property(\"xAxis\");\n    pm.expect(jsonData).to.have.property(\"series\");\n    pm.expect(jsonData.series).to.be.an(\"array\");\n});\n"
+                ]
               }
             }
           ],
@@ -7585,14 +7620,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/quarter/chart?kode_wilayah=00&kode=MA100",
+              "raw": "{{base_url}}/api/v1/pklnprt/quarter/chart?kode_wilayah=00&kode=MA100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "quarter",
                 "chart"
               ],
@@ -7616,152 +7651,10 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "const statusCode = pm.response.code;",
-                  "const requestedKode = pm.request.url.query.get('kode');",
-                  "const requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');",
-                  "let jsonData = null;",
-                  "let isValidJson = false;",
-                  "",
-                  "try {",
-                  "    jsonData = pm.response.json();",
-                  "    isValidJson = true;",
-                  "} catch (error) {",
-                  "    isValidJson = false;",
-                  "}",
-                  "",
-                  "pm.test('Status respons sesuai skenario yang didukung', function () {",
-                  "    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);",
-                  "});",
-                  "",
-                  "pm.test('Respons berupa JSON yang valid', function () {",
-                  "    pm.expect(isValidJson, 'Body respons harus berupa JSON valid').to.be.true;",
-                  "});",
-                  "",
-                  "function hasOwn(object, key) {",
-                  "    return object !== null && typeof object === 'object' &&",
-                  "        Object.prototype.hasOwnProperty.call(object, key);",
-                  "}",
-                  "",
-                  "function assertMatchingCodes(object, location) {",
-                  "    if (!object || typeof object !== 'object') return;",
-                  "",
-                  "    if (hasOwn(object, 'kode') && requestedKode !== null && requestedKode !== '') {",
-                  "        pm.expect(String(object.kode), location + '.kode').to.eql(String(requestedKode));",
-                  "    }",
-                  "",
-                  "    if (hasOwn(object, 'kode_wilayah') && requestedKodeWilayah !== null && requestedKodeWilayah !== '') {",
-                  "        pm.expect(String(object.kode_wilayah), location + '.kode_wilayah').to.eql(String(requestedKodeWilayah));",
-                  "    }",
-                  "}",
-                  "",
-                  "function findDataArray(body) {",
-                  "    if (Array.isArray(body)) return body;",
-                  "    if (!body || typeof body !== 'object') return null;",
-                  "    if (Array.isArray(body.data)) return body.data;",
-                  "    if (body.data && typeof body.data === 'object') {",
-                  "        if (Array.isArray(body.data.data)) return body.data.data;",
-                  "        if (Array.isArray(body.data.items)) return body.data.items;",
-                  "        if (Array.isArray(body.data.results)) return body.data.results;",
-                  "    }",
-                  "    if (Array.isArray(body.items)) return body.items;",
-                  "    if (Array.isArray(body.results)) return body.results;",
-                  "    return null;",
-                  "}",
-                  "",
-                  "function collectMetadata(body) {",
-                  "    if (!body || typeof body !== 'object' || Array.isArray(body)) return [];",
-                  "    const candidates = [body];",
-                  "    ['meta', 'metadata', 'pagination', 'params', 'query', 'request'].forEach(function (key) {",
-                  "        if (body[key] && typeof body[key] === 'object') candidates.push(body[key]);",
-                  "    });",
-                  "    if (body.data && typeof body.data === 'object' && !Array.isArray(body.data)) {",
-                  "        candidates.push(body.data);",
-                  "        ['meta', 'metadata', 'pagination', 'params', 'query', 'request'].forEach(function (key) {",
-                  "            if (body.data[key] && typeof body.data[key] === 'object') candidates.push(body.data[key]);",
-                  "        });",
-                  "    }",
-                  "    return candidates;",
-                  "}",
-                  "",
-                  "function findEchoedCode(body) {",
-                  "    const candidates = collectMetadata(body);",
-                  "    for (let index = 0; index < candidates.length; index += 1) {",
-                  "        if (hasOwn(candidates[index], 'kode')) return candidates[index].kode;",
-                  "    }",
-                  "    return undefined;",
-                  "}",
-                  "",
-                  "if ([200, 201].includes(statusCode)) {",
-                  "    pm.test('Status sukses adalah 200 atau 201', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([200, 201]);",
-                  "    });",
-                  "",
-                  "    if (isValidJson) {",
-                  "        const dataItems = findDataArray(jsonData);",
-                  "",
-                  "        pm.test('Kode pada metadata dan item data sesuai parameter request', function () {",
-                  "            collectMetadata(jsonData).forEach(function (candidate, index) {",
-                  "                assertMatchingCodes(candidate, 'metadata[' + index + ']');",
-                  "            });",
-                  "",
-                  "            if (Array.isArray(dataItems)) {",
-                  "                dataItems.forEach(function (item, index) {",
-                  "                    assertMatchingCodes(item, 'data[' + index + ']');",
-                  "                });",
-                  "            }",
-                  "        });",
-                  "",
-                  "        if (Array.isArray(dataItems) && dataItems.length === 0) {",
-                  "            pm.test('Kode tidak dikenal mengembalikan 200, data kosong, dan echo kode', function () {",
-                  "                pm.expect(statusCode).to.eql(200);",
-                  "                pm.expect(dataItems).to.be.an('array').that.is.empty;",
-                  "                pm.expect(findEchoedCode(jsonData), 'Kode request harus di-echo pada metadata/envelope')",
-                  "                    .to.not.eql(undefined);",
-                  "                pm.expect(String(findEchoedCode(jsonData))).to.eql(String(requestedKode));",
-                  "            });",
-                  "        }",
-                  "    }",
-                  "}",
-                  "",
-                  "if (statusCode === 401) {",
-                  "    pm.test('Skenario unauthorized mengembalikan 401 dan bukan 500', function () {",
-                  "        pm.expect(statusCode).to.eql(401);",
-                  "        pm.expect(statusCode).not.to.eql(500);",
-                  "    });",
-                  "}",
-                  "",
-                  "if ([400, 422].includes(statusCode)) {",
-                  "    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {",
-                  "        pm.expect(statusCode).to.be.oneOf([400, 422]);",
-                  "    });",
-                  "",
-                  "    if (isValidJson) {",
-                  "        pm.test('Respons parameter tidak valid memiliki pesan error yang detail', function () {",
-                  "            const detail = jsonData && (",
-                  "                jsonData.detail || jsonData.message || jsonData.error || jsonData.errors ||",
-                  "                (jsonData.data && (jsonData.data.detail || jsonData.data.message || jsonData.data.error || jsonData.data.errors))",
-                  "            );",
-                  "            pm.expect(detail, 'detail/message/error/errors harus tersedia').to.exist;",
-                  "            if (typeof detail === 'string') {",
-                  "                pm.expect(detail.trim().length, 'Pesan error tidak boleh kosong').to.be.above(0);",
-                  "            } else {",
-                  "                pm.expect(detail, 'Detail error harus berisi informasi').to.satisfy(function (value) {",
-                  "                    return Array.isArray(value) ? value.length > 0 :",
-                  "                        value && typeof value === 'object' ? Object.keys(value).length > 0 : Boolean(value);",
-                  "                });",
-                  "            }",
-                  "        });",
-                  "    }",
-                  "}",
-                  "",
-                  "pm.test('Server tidak mengembalikan internal error 500', function () {",
-                  "    pm.expect(statusCode).not.to.eql(500);",
-                  "});"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const statusCode = pm.response.code;\nconst requestedKode = pm.request.url.query.get('kode');\nconst requestedKodeWilayah = pm.request.url.query.get('kode_wilayah');\nlet jsonData = null;\nlet isValidJson = false;\n\ntry {\n    jsonData = pm.response.json();\n    isValidJson = true;\n} catch (error) {\n    isValidJson = false;\n}\n\npm.test('Status respons sesuai skenario yang didukung', function () {\n    pm.expect([200, 201, 400, 401, 422]).to.include(statusCode);\n});\n\npm.test('Respons berupa JSON yang valid', function () {\n    pm.expect(isValidJson, 'Body respons harus berupa JSON valid').to.be.true;\n});\n\nfunction hasOwn(object, key) {\n    return object !== null && typeof object === 'object' &&\n        Object.prototype.hasOwnProperty.call(object, key);\n}\n\nfunction assertMatchingCodes(object, location) {\n    if (!object || typeof object !== 'object') return;\n\n    if (hasOwn(object, 'kode') && requestedKode !== null && requestedKode !== '') {\n        pm.expect(String(object.kode), location + '.kode').to.eql(String(requestedKode));\n    }\n\n    if (hasOwn(object, 'kode_wilayah') && requestedKodeWilayah !== null && requestedKodeWilayah !== '') {\n        pm.expect(String(object.kode_wilayah), location + '.kode_wilayah').to.eql(String(requestedKodeWilayah));\n    }\n}\n\nfunction findDataArray(body) {\n    if (Array.isArray(body)) return body;\n    if (!body || typeof body !== 'object') return null;\n    if (Array.isArray(body.data)) return body.data;\n    if (body.data && typeof body.data === 'object') {\n        if (Array.isArray(body.data.data)) return body.data.data;\n        if (Array.isArray(body.data.items)) return body.data.items;\n        if (Array.isArray(body.data.results)) return body.data.results;\n    }\n    if (Array.isArray(body.items)) return body.items;\n    if (Array.isArray(body.results)) return body.results;\n    return null;\n}\n\nfunction collectMetadata(body) {\n    if (!body || typeof body !== 'object' || Array.isArray(body)) return [];\n    const candidates = [body];\n    ['meta', 'metadata', 'pagination', 'params', 'query', 'request'].forEach(function (key) {\n        if (body[key] && typeof body[key] === 'object') candidates.push(body[key]);\n    });\n    if (body.data && typeof body.data === 'object' && !Array.isArray(body.data)) {\n        candidates.push(body.data);\n        ['meta', 'metadata', 'pagination', 'params', 'query', 'request'].forEach(function (key) {\n            if (body.data[key] && typeof body.data[key] === 'object') candidates.push(body.data[key]);\n        });\n    }\n    return candidates;\n}\n\nfunction findEchoedCode(body) {\n    const candidates = collectMetadata(body);\n    for (let index = 0; index < candidates.length; index += 1) {\n        if (hasOwn(candidates[index], 'kode')) return candidates[index].kode;\n    }\n    return undefined;\n}\n\nif ([200, 201].includes(statusCode)) {\n    pm.test('Status sukses adalah 200 atau 201', function () {\n        pm.expect(statusCode).to.be.oneOf([200, 201]);\n    });\n\n    if (isValidJson) {\n        const dataItems = findDataArray(jsonData);\n\n        pm.test('Kode pada metadata dan item data sesuai parameter request', function () {\n            collectMetadata(jsonData).forEach(function (candidate, index) {\n                assertMatchingCodes(candidate, 'metadata[' + index + ']');\n            });\n\n            if (Array.isArray(dataItems)) {\n                dataItems.forEach(function (item, index) {\n                    assertMatchingCodes(item, 'data[' + index + ']');\n                });\n            }\n        });\n\n        if (Array.isArray(dataItems) && dataItems.length === 0) {\n            pm.test('Kode tidak dikenal mengembalikan 200, data kosong, dan echo kode', function () {\n                pm.expect(statusCode).to.eql(200);\n                pm.expect(dataItems).to.be.an('array').that.is.empty;\n                pm.expect(findEchoedCode(jsonData), 'Kode request harus di-echo pada metadata/envelope')\n                    .to.not.eql(undefined);\n                pm.expect(String(findEchoedCode(jsonData))).to.eql(String(requestedKode));\n            });\n        }\n    }\n}\n\nif (statusCode === 401) {\n    pm.test('Skenario unauthorized mengembalikan 401 dan bukan 500', function () {\n        pm.expect(statusCode).to.eql(401);\n        pm.expect(statusCode).not.to.eql(500);\n    });\n}\n\nif ([400, 422].includes(statusCode)) {\n    pm.test('Parameter kosong/tidak valid mengembalikan 400 atau 422', function () {\n        pm.expect(statusCode).to.be.oneOf([400, 422]);\n    });\n\n    if (isValidJson) {\n        pm.test('Respons parameter tidak valid memiliki pesan error yang detail', function () {\n            const detail = jsonData && (\n                jsonData.detail || jsonData.message || jsonData.error || jsonData.errors ||\n                (jsonData.data && (jsonData.data.detail || jsonData.data.message || jsonData.data.error || jsonData.data.errors))\n            );\n            pm.expect(detail, 'detail/message/error/errors harus tersedia').to.exist;\n            if (typeof detail === 'string') {\n                pm.expect(detail.trim().length, 'Pesan error tidak boleh kosong').to.be.above(0);\n            } else {\n                pm.expect(detail, 'Detail error harus berisi informasi').to.satisfy(function (value) {\n                    return Array.isArray(value) ? value.length > 0 :\n                        value && typeof value === 'object' ? Object.keys(value).length > 0 : Boolean(value);\n                });\n            }\n        });\n    }\n}\n\npm.test('Server tidak mengembalikan internal error 500', function () {\n    pm.expect(statusCode).not.to.eql(500);\n});"
+                ]
               }
             }
           ],
@@ -7779,14 +7672,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/annual/chart?kode_wilayah=00&kode=MA100",
+              "raw": "{{base_url}}/api/v1/pklnprt/annual/chart?kode_wilayah=00&kode=MA100",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "annual",
                 "chart"
               ],
@@ -7810,59 +7703,10 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response time is under 500 ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
-                  "});",
-                  "",
-                  "pm.test(\"Content-Type is JSON\", function () {",
-                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.match(/^application\\/(?:[\\w.+-]+\\+)?json\\b/i);",
-                  "});",
-                  "",
-                  "let jsonData;",
-                  "pm.test(\"Response body is valid JSON object\", function () {",
-                  "    jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.be.an(\"object\").and.not.to.be.an(\"array\");",
-                  "});",
-                  "",
-                  "pm.test(\"Response has a top-level data object\", function () {",
-                  "    pm.expect(jsonData).to.have.property(\"data\");",
-                  "    pm.expect(jsonData.data).to.be.an(\"object\").and.not.to.be.an(\"array\");",
-                  "});",
-                  "",
-                  "pm.test(\"Every indicator entry has the expected structure\", function () {",
-                  "    Object.entries(jsonData.data).forEach(function ([entryKey, entry]) {",
-                  "        pm.expect(entry, `data.${entryKey}`).to.be.an(\"object\").and.not.to.be.an(\"array\");",
-                  "        pm.expect(entry, `data.${entryKey}`).to.have.property(\"indikator\");",
-                  "        pm.expect(entry.indikator, `data.${entryKey}.indikator`).to.be.an(\"object\").and.not.to.be.an(\"array\");",
-                  "",
-                  "        [\"kode\", \"deskripsi\", \"satuan\", \"freq\", \"konversi\"].forEach(function (field) {",
-                  "            pm.expect(entry.indikator, `data.${entryKey}.indikator`).to.have.property(field);",
-                  "            pm.expect(entry.indikator[field], `data.${entryKey}.indikator.${field}`).to.be.a(\"string\");",
-                  "        });",
-                  "",
-                  "        pm.expect(entry, `data.${entryKey}`).to.have.property(\"series\");",
-                  "        pm.expect(entry.series, `data.${entryKey}.series`).to.be.an(\"object\").and.not.to.be.an(\"array\");",
-                  "",
-                  "        Object.entries(entry.series).forEach(function ([bucketName, bucket]) {",
-                  "            if (bucket && typeof bucket === \"object\" && !Array.isArray(bucket) &&",
-                  "                Object.prototype.hasOwnProperty.call(bucket, \"periods\") &&",
-                  "                Object.prototype.hasOwnProperty.call(bucket, \"values\")) {",
-                  "                pm.expect(bucket.periods, `data.${entryKey}.series.${bucketName}.periods`).to.be.an(\"array\");",
-                  "                pm.expect(bucket.values, `data.${entryKey}.series.${bucketName}.values`).to.be.an(\"array\");",
-                  "                pm.expect(bucket.values.length, `data.${entryKey}.series.${bucketName} periods/values length`).to.equal(bucket.periods.length);",
-                  "            }",
-                  "        });",
-                  "    });",
-                  "});"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response time is under 500 ms\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(500);\n});\n\npm.test(\"Content-Type is JSON\", function () {\n    pm.expect(pm.response.headers.get(\"Content-Type\")).to.match(/^application\\/(?:[\\w.+-]+\\+)?json\\b/i);\n});\n\nlet jsonData;\npm.test(\"Response body is valid JSON object\", function () {\n    jsonData = pm.response.json();\n    pm.expect(jsonData).to.be.an(\"object\").and.not.to.be.an(\"array\");\n});\n\npm.test(\"Response has a top-level data object\", function () {\n    pm.expect(jsonData).to.have.property(\"data\");\n    pm.expect(jsonData.data).to.be.an(\"object\").and.not.to.be.an(\"array\");\n});\n\npm.test(\"Every indicator entry has the expected structure\", function () {\n    Object.entries(jsonData.data).forEach(function ([entryKey, entry]) {\n        pm.expect(entry, `data.${entryKey}`).to.be.an(\"object\").and.not.to.be.an(\"array\");\n        pm.expect(entry, `data.${entryKey}`).to.have.property(\"indikator\");\n        pm.expect(entry.indikator, `data.${entryKey}.indikator`).to.be.an(\"object\").and.not.to.be.an(\"array\");\n\n        [\"kode\", \"deskripsi\", \"satuan\", \"freq\", \"konversi\"].forEach(function (field) {\n            pm.expect(entry.indikator, `data.${entryKey}.indikator`).to.have.property(field);\n            pm.expect(entry.indikator[field], `data.${entryKey}.indikator.${field}`).to.be.a(\"string\");\n        });\n\n        pm.expect(entry, `data.${entryKey}`).to.have.property(\"series\");\n        pm.expect(entry.series, `data.${entryKey}.series`).to.be.an(\"object\").and.not.to.be.an(\"array\");\n\n        Object.entries(entry.series).forEach(function ([bucketName, bucket]) {\n            if (bucket && typeof bucket === \"object\" && !Array.isArray(bucket) &&\n                Object.prototype.hasOwnProperty.call(bucket, \"periods\") &&\n                Object.prototype.hasOwnProperty.call(bucket, \"values\")) {\n                pm.expect(bucket.periods, `data.${entryKey}.series.${bucketName}.periods`).to.be.an(\"array\");\n                pm.expect(bucket.values, `data.${entryKey}.series.${bucketName}.values`).to.be.an(\"array\");\n                pm.expect(bucket.values.length, `data.${entryKey}.series.${bucketName} periods/values length`).to.equal(bucket.periods.length);\n            }\n        });\n    });\n});"
+                ]
               }
             }
           ],
@@ -7880,14 +7724,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/pkrt/aggregated?kode_wilayah=00",
+              "raw": "{{base_url}}/api/v1/pklnprt/aggregated?kode_wilayah=00",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "pkrt",
+                "pklnprt",
                 "aggregated"
               ],
               "query": [
@@ -7907,6 +7751,65 @@
       "item": [
         {
           "name": "Add Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Duplicate data insert is rejected (400/409/422)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response time is under 1000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(1000);\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 1. Memastikan access_token tersedia di environment variables sebelum request dikirim\r\nvar accessToken = pm.environment.get(\"access_token\");\r\n\r\nif (!accessToken || accessToken.trim() === \"\") {\r\n    console.warn(\"Peringatan: access_token kosong atau belum tersedia! Pastikan Anda sudah menjalankan request login terlebih dahulu.\");\r\n} else {\r\n    console.log(\"access_token siap digunakan.\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"kode_wilayah\": \"00\",\r\n  \"kode\": \"MX999\",\r\n  \"deskripsi\": \"Indeks Penjualan Inventori X999\",\r\n  \"satuan\": \"Indeks\",\r\n  \"konversi\": \"AVG\",\r\n  \"periode\": \"2099M1\",\r\n  \"nilai\": \"999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/inventori/data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "inventori",
+                "data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Data Copy",
           "event": [
             {
               "listen": "test",
@@ -7950,14 +7853,14 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/inventor/data",
+              "raw": "{{base_url}}/api/v1/inventori/data",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventor",
+                "inventori",
                 "data"
               ]
             }
@@ -8776,14 +8679,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/inventor/aggregated?kode_wilayah=00",
+              "raw": "{{base_url}}/api/v1/inventori/aggregated?kode_wilayah=00",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "inventor",
+                "inventori",
                 "aggregated"
               ],
               "query": [

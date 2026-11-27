@@ -1,264 +1,324 @@
-# Skenario Pengujian API — Autentikasi & Modul PKRT (`DNPeng API`)
+# Skenario Pengujian API — Autentikasi & 7 Modul Data (`DNPeng API`)
 
-Dokumen ini berisi rincian skenario pengujian lengkap untuk setiap *endpoint* yang terlibat dalam alur kerja modul **PKRT**, dimulai dari proses login (`POST Login User`) hingga pengambilan data agregasi (`GET Aggregated Data`). Setiap *endpoint* dilengkapi dengan pengujian **Positive Case** (kondisi normal), **Edge Case** (kondisi batas/data kosong), dan **Negative Case** (autentikasi, validasi parameter/payload, serta pencegahan *error* `500`).
+Dokumen ini berisi rincian skenario pengujian lengkap untuk seluruh *endpoint* pada **DNPeng API**, mencakup **Autentikasi** serta **7 modul data**: **PKRT**, **PKP**, **PMTB**, **EKSIM**, **PDB**, **PKLNPRT**, dan **INVENTORI**.
 
-## Ringkasan Alur Pengujian
+Seluruh *endpoint* modul data dilindungi oleh mekanisme autentikasi **Bearer Token (JWT)** dan diuji menggunakan **Postman Collection Runner** dengan tiga kategori kasus pengujian:
+* **Positive Case:** Alur normal dengan token, parameter query, dan *payload* yang valid.
+* **Edge Case:** Kondisi batas seperti data kosong (*empty array/object*) atau satu titik data pada perhitungan pertumbuhan.
+* **Negative Case:** Pengujian duplikasi data pada `POST .../data` (`kode_wilayah`, `kode`, `tahun`, `freq`, `period` yang sama), akses tanpa token/token tidak valid (`401`), serta kesalahan tipe/format parameter maupun *payload* (`400`/`409`/`422`).
+
+---
+
+## Ringkasan Daftar Endpoint & Skenario per Modul
+
+### A. Modul Autentikasi (`Auth` — 1 Endpoint)
 
 | No | Nama Request | Method | Endpoint | Autentikasi |
-| ----- | ----- | ----- | ----- | ----- |
+| :---: | :--- | :---: | :--- | :---: |
 | 1 | Login User | `POST` | `/api/v1/auth/login` | No Auth |
-| 2 | Add Data | `POST` | `/api/v1/pkrt/data` | Bearer Token |
-| 3 | Get Data | `GET` | `/api/v1/pkrt/data` | Bearer Token |
-| 4 | Get Data by Kode | `GET` | `/api/v1/pkrt/kode` | Bearer Token |
-| 5 | Get Data by Periode | `GET` | `/api/v1/pkrt/periode` | Bearer Token |
-| 6 | Get Timeseries Data by Kode | `GET` | `/api/v1/pkrt/timeseries` | Bearer Token |
-| 7 | Get Indikator | `GET` | `/api/v1/pkrt/indikator` | Bearer Token |
-| 8 | Get Latest Data | `GET` | `/api/v1/pkrt/latest` | Bearer Token |
-| 9 | Get Growth Data by Kode and Type | `GET` | `/api/v1/pkrt/growth` | Bearer Token |
-| 10 | Get Quarter Data by Kode | `GET` | `/api/v1/pkrt/quarter` | Bearer Token |
-| 11 | Get Annual Data by Kode | `GET` | `/api/v1/pkrt/annual` | Bearer Token |
-| 12 | Get Chart Data by Kode | `GET` | `/api/v1/pkrt/chart` | Bearer Token |
-| 13 | Get Growth Chart Data by Kode and Type | `GET` | `/api/v1/pkrt/growth/chart` | Bearer Token |
-| 14 | Get Quarter Chart Data by Kode | `GET` | `/api/v1/pkrt/quarter/chart` | Bearer Token |
-| 15 | Get Annual Chart Data by Kode | `GET` | `/api/v1/pkrt/annual/chart` | Bearer Token |
-| 16 | Get Aggregated Data | `GET` | `/api/v1/pkrt/aggregated` | Bearer Token |
+
+---
+
+### B. Modul Berbasis Frekuensi Bulanan/Triwulanan (`PKRT`, `PKP`, `PMTB`, `EKSIM`, `PKLNPRT`, `INVENTORI` — 16 Request per Modul)
+
+Setiap modul pada kelompok ini memiliki **16 *request*** (termasuk pengujian duplikat pada `POST .../data`) dengan pola *endpoint* sebagai berikut *(ganti `{modul}` dengan `pkrt`, `pkp`, `pmtb`, `eksim`, `pklnprt`, atau `inventori`)*:
+
+| No | Nama Request | Method | Endpoint | Autentikasi |
+| :---: | :--- | :---: | :--- | :---: |
+| 1 | Add Data | `POST` | `/api/v1/{modul}/data` | Bearer Token |
+| 2 | Add Data (Duplicate - Expect Fail) | `POST` | `/api/v1/{modul}/data` | Bearer Token |
+| 3 | Get Data | `GET` | `/api/v1/{modul}/data` | Bearer Token |
+| 4 | Get Data by Kode | `GET` | `/api/v1/{modul}/kode` | Bearer Token |
+| 5 | Get Data by Periode | `GET` | `/api/v1/{modul}/periode` | Bearer Token |
+| 6 | Get Timeseries Data by Kode | `GET` | `/api/v1/{modul}/timeseries` | Bearer Token |
+| 7 | Get Indikator | `GET` | `/api/v1/{modul}/indikator` | Bearer Token |
+| 8 | Get Latest Data | `GET` | `/api/v1/{modul}/latest` | Bearer Token |
+| 9 | Get Growth Data by Kode and Type | `GET` | `/api/v1/{modul}/growth` | Bearer Token |
+| 10 | Get Quarter Data by Kode | `GET` | `/api/v1/{modul}/quarter` | Bearer Token |
+| 11 | Get Annual Data by Kode | `GET` | `/api/v1/{modul}/annual` | Bearer Token |
+| 12 | Get Chart Data by Kode | `GET` | `/api/v1/{modul}/chart` | Bearer Token |
+| 13 | Get Growth Chart Data by Kode and Type | `GET` | `/api/v1/{modul}/growth/chart` | Bearer Token |
+| 14 | Get Quarter Chart Data by Kode | `GET` | `/api/v1/{modul}/quarter/chart` | Bearer Token |
+| 15 | Get Annual Chart Data by Kode | `GET` | `/api/v1/{modul}/annual/chart` | Bearer Token |
+| 16 | Get Aggregated Data | `GET` | `/api/v1/{modul}/aggregated` | Bearer Token |
+
+---
+
+### C. Modul Produk Domestik Bruto (`PDB` — 13 Request)
+
+Modul **PDB** memiliki struktur data berbasis triwulanan dengan parameter `jenis` (`ADHB` / `ADHK`) dan tipe `kode` berupa bilangan bulat (`integer`), terdiri dari **13 *request***:
+
+| No | Nama Request | Method | Endpoint | Autentikasi |
+| :---: | :--- | :---: | :--- | :---: |
+| 1 | Add Data | `POST` | `/api/v1/pdb/data` | Bearer Token |
+| 2 | Add Data (Duplicate - Expect Fail) | `POST` | `/api/v1/pdb/data` | Bearer Token |
+| 3 | Get Data | `GET` | `/api/v1/pdb/data` | Bearer Token |
+| 4 | Get Data by Kode | `GET` | `/api/v1/pdb/kode` | Bearer Token |
+| 5 | Get Data by Periode | `GET` | `/api/v1/pdb/periode` | Bearer Token |
+| 6 | Get Timeseries Data by Kode | `GET` | `/api/v1/pdb/timeseries` | Bearer Token |
+| 7 | Get Indikator | `GET` | `/api/v1/pdb/indikator` | Bearer Token |
+| 8 | Get Latest Data | `GET` | `/api/v1/pdb/latest` | Bearer Token |
+| 9 | Get Growth Data by Kode and Type | `GET` | `/api/v1/pdb/growth` | Bearer Token |
+| 10 | Get Annual Data by Kode | `GET` | `/api/v1/pdb/annual` | Bearer Token |
+| 11 | Get Chart Data by Kode | `GET` | `/api/v1/pdb/chart` | Bearer Token |
+| 12 | Get Growth Chart Data by Kode and Type | `GET` | `/api/v1/pdb/growth/chart` | Bearer Token |
+| 13 | Get Annual Chart Data by Kode | `GET` | `/api/v1/pdb/annual/chart` | Bearer Token |
 
 ---
 
 ## Rincian Skenario Pengujian per Endpoint
 
-### 1. Auth — `POST Login User`
+### 1. Autentikasi — `POST Login User`
 
 * **Endpoint:** `{{base_url}}/api/v1/auth/login`
 * **Body (`x-www-form-urlencoded`):** `username` (`admin@admin.com`), `password` (`admin123`)
 * **Skenario Pengujian:**
   1. **\[Positive\] Login dengan kredensial valid:**
-     * **Ekspektasi:** Status kode `200 OK`, `Content-Type` berupa `application/json`, dan waktu respons di bawah `1000 ms`.
-     * **Validasi Struktur:** *Response body* wajib memiliki *key* `access_token`, `refresh_token`, `token_type` (`bearer`), dan objek `user` (`id`, `name`, `email`, `role`).
-     * **Aksi Lanjutan:** Menyimpan nilai `access_token` dan `refresh_token` ke dalam *environment variable* Postman untuk digunakan oleh seluruh *request* PKRT berikutnya.
-  2. **\[Edge Case\] Input username mengandung spasi di awal/akhir atau huruf kapital berbeda (case-sensitivity):**
-     * **Ekspektasi:** Sistem menangani normalisasi email secara konsisten atau menolak secara bersih (`401 Unauthorized` / `422 Unprocessable Entity`) tanpa memicu `500 Internal Server Error`.
+     * **Ekspektasi:** Status kode `200 OK`, `Content-Type` `application/json`, dan waktu respons di bawah `1000 ms`.
+     * **Validasi Struktur:** *Response body* memiliki *key* `access_token`, `refresh_token`, `token_type` (`bearer`), dan objek `user` (`id`, `name`, `email`, `role`).
+     * **Aksi Lanjutan:** Menyimpan nilai `access_token` dan `refresh_token` ke dalam *environment variable* Postman untuk seluruh *request* berikutnya.
+  2. **\[Edge Case\] Input username mengandung spasi di awal/akhir atau perbedaan huruf kapital:**
+     * **Ekspektasi:** Sistem menangani normalisasi atau menolak dengan bersih (`401` / `422`) tanpa memicu `500 Internal Server Error`.
   3. **\[Negative\] Login dengan password salah, user tidak terdaftar, atau field wajib kosong:**
-     * **Ekspektasi:** Mengembalikan status `401 Unauthorized` (kredensial salah) atau `422 Unprocessable Entity` (*field* hilang) dalam format JSON yang valid tanpa memperbarui token di *environment*.
+     * **Ekspektasi:** Mengembalikan status `401 Unauthorized` atau `422 Unprocessable Entity` dalam format JSON valid.
 
 ---
 
-### 2. PKRT — `POST Add Data`
+### 2. Insert Data — `POST /api/v1/{modul}/data` (`Add Data`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/data`
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Header:** `Authorization: Bearer {{access_token}}`
+* **Contoh Parameter Khusus:**
+  * `pkrt`, `pkp`, `pmtb`, `eksim`, `pklnprt`, `inventori`: `kode` bertipe `string` (contoh: `"MA1014"`, `"MKP001"`), `periode` format `YYYYM1-12` atau `YYYYQ1-4`.
+  * `pdb`: `kode` bertipe `integer` (contoh: `10000`), `jenis` (`"ADHB"` atau `"ADHK"`), `periode` format `YYYYQ1-4`.
+* **Skenario Pengujian:**
+  1. **\[Positive\] Tambah data baru dengan payload dan token valid:**
+     * **Ekspektasi:** Status kode `200 OK` (atau `201 Created`) dengan *response body* JSON yang sesuai skema modul.
+  2. **\[Edge Case\] Pengiriman nilai angka `0` atau nilai negatif pada komponen tertentu (misal perubahan inventori / net ekspor):**
+     * **Ekspektasi:** Sistem menerima angka *floating-point* valid dan menyimpannya dengan benar tanpa *error* validasi.
+  3. **\[Negative\] Akses tanpa token atau token kedaluwarsa:**
+     * **Ekspektasi:** Mengembalikan status `401 Unauthorized` atau `403 Forbidden`.
+  4. **\[Negative\] Format payload tidak valid (misal format `periode` salah, `jenis` selain `ADHB`/`ADHK` pada PDB, atau tipe data salah):**
+     * **Ekspektasi:** Mengembalikan status `400 Bad Request` atau `422 Unprocessable Entity`.
+
+---
+
+### 3. Validasi Duplikasi Insert Data — `POST /api/v1/{modul}/data` (`Add Data (Duplicate - Expect Fail)`)
+
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
 * **Header:** `Authorization: Bearer {{access_token}}`
 * **Skenario Pengujian:**
-  1. **\[Positive\] Tambah data PKRT dengan payload dan token valid:**
-     * **Ekspektasi:** Status kode `200 OK` (atau `201 Created`) dengan *response body* berupa JSON valid.
-  2. **\[Edge Case\] Pengiriman data duplikat (kombinasi `kode_wilayah`, `kode`, dan `periode` sudah ada) atau nilai `0` / negatif:**
-     * **Ekspektasi:** Sistem menangani sesuai aturan bisnis (*upsert*/*update* atau menolak dengan status `400`/`409` dengan pesan JSON jelas) tanpa *crash* pada database.
-  3. **\[Negative\] Akses tanpa token, token kedaluwarsa, atau role tidak memiliki izin tulis:**
-     * **Ekspektasi:** Mengembalikan status `401 Unauthorized` atau `403 Forbidden` dengan pesan *error* JSON yang jelas.
-  4. **\[Negative\] Body request kosong, format JSON rusak, atau tipe data field salah (misalnya `nilai` berisi string):**
-     * **Ekspektasi:** Mengembalikan status `400 Bad Request` atau `422 Unprocessable Entity` dengan detail kesalahan validasi pada *field* terkait.
+  1. **\[Negative\] Insert ulang data dengan kunci unik yang sama (`kode_wilayah`, `kode`, `tahun`, `freq`, dan `period` identik — serta `jenis` yang sama untuk PDB):**
+     * **Ekspektasi:** Sistem menolak proses penyimpanan ganda (*IntegrityError* ditangani dengan baik), melakukan *rollback* transaksi database, dan mengembalikan status `409 Conflict` (atau `400`/`422`) dalam format JSON valid tanpa memicu `500 Internal Server Error`.
 
 ---
 
-### 3. PKRT — `GET Get Data`
+### 4. Ambil Semua Data Wilayah — `GET /api/v1/{modul}/data` (`Get Data`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/data?kode_wilayah=00`
-* **Parameter Query:** `kode_wilayah` (contoh: `00`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00` (opsional: `kode`, `periode`, serta `jenis` khusus PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data PKRT berdasarkan `kode_wilayah` yang valid:**
-     * **Ekspektasi:** Status kode `200 OK` dan *response body* berupa JSON valid.
-  2. **\[Edge Case\] Data belum tersedia di database untuk `kode_wilayah` yang diminta:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan JSON valid (misalnya *array* kosong `[]`) tanpa memicu *error* `500`.
-  3. **\[Negative\] Akses tanpa token valid atau parameter `kode_wilayah` kosong/tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (tanpa token valid) atau `400`/`422` (jika parameter wajib tidak terpenuhi) dalam format JSON.
+  1. **\[Positive\] Ambil daftar data berdasarkan `kode_wilayah` valid dengan token aktif:**
+     * **Ekspektasi:** Status `200 OK`, waktu respons `< 1000 ms`, dan *body* berupa *array* JSON valid.
+  2. **\[Edge Case\] Wilayah belum memiliki data pada tabel modul terkait:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]`.
+  3. **\[Negative\] Akses tanpa Bearer Token atau tanpa parameter wajib `kode_wilayah`:**
+     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `422 Unprocessable Entity`.
 
 ---
 
-### 4. PKRT — `GET Get Data by Kode`
+### 5. Ambil Data Berdasarkan Kode — `GET /api/v1/{modul}/kode` (`Get Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/kode?kode_wilayah=00&kode=MA1014`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA1014`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode_indikator}` (ditambah `&jenis=ADHK` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data berdasarkan kombinasi `kode_wilayah` dan `kode` indikator:**
-     * **Ekspektasi:** Status kode `200 OK` dan respons berupa JSON valid.
-  2. **\[Edge Case\] `kode` indikator tidak ditemukan pada `kode_wilayah` tersebut:**
-     * **Ekspektasi:** Tetap merespons `200 OK` dengan JSON valid (*array* kosong `[]`) dan tidak terjadi *crash* pada *server*.
-  3. **\[Negative\] Parameter wajib (`kode` atau `kode_wilayah`) tidak dikirim atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (token invalid) atau `400`/`422` (parameter kurang) dengan pesan detail JSON.
+  1. **\[Positive\] Ambil seluruh histori data untuk kombinasi `kode_wilayah` dan `kode` tertentu:**
+     * **Ekspektasi:** Status `200 OK` dan respons *array* JSON valid sesuai tipe data `kode` masing-masing modul (`string` untuk 6 modul, `number` untuk PDB).
+  2. **\[Edge Case\] `kode` indikator tidak ditemukan pada wilayah yang diminta:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]`.
+  3. **\[Negative\] Parameter wajib `kode` tidak dikirim atau tipe parameter tidak sesuai (misal `kode=abc` pada PDB):**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` (atau `401` jika tanpa token).
 
 ---
 
-### 5. PKRT — `GET Get Data by Periode`
+### 6. Ambil Data Berdasarkan Periode — `GET /api/v1/{modul}/periode` (`Get Data by Periode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/periode?kode_wilayah=00&periode=2025M12`
-* **Parameter Query:** `kode_wilayah` (`00`), `periode` (`2025M12`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&periode={periode}` (ditambah `&jenis=ADHB` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data PKRT berdasarkan `kode_wilayah` dan `periode` tertentu:**
-     * **Ekspektasi:** Status kode `200 OK`, `Content-Type` `application/json`, waktu respons cepat, dan *body* berupa JSON valid.
-  2. **\[Edge Case\] Periode valid secara format (misal `2025M12` atau `2019Q2`) namun belum memiliki data di database:**
-     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]` tanpa *server error*.
-  3. **\[Negative\] Format `periode` tidak sesuai standar (misal `2025-12` atau `abc`), parameter kosong, atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (jika tidak terautentikasi) atau `400`/`422` (jika format/parameter tidak valid) dalam format JSON.
+  1. **\[Positive\] Ambil seluruh indikator pada `kode_wilayah` dan `periode` tertentu:**
+     * **Ekspektasi:** Status `200 OK`, `Content-Type` `application/json`, dan *body* JSON valid.
+  2. **\[Edge Case\] Periode memiliki format valid namun belum memiliki data:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]`.
+  3. **\[Negative\] Format `periode` salah (misal `2025-12`) atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `400`/`422` atau `401 Unauthorized`.
 
 ---
 
-### 6. PKRT — `GET Get Timeseries Data by Kode`
+### 7. Ambil Data Deret Waktu — `GET /api/v1/{modul}/timeseries` (`Get Timeseries Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/timeseries?kode_wilayah=00&kode=MA100&start=2024M1&end=2024M12`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`), `start` (`2024M1`), `end` (`2024M12`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}&start={start}&end={end}` (ditambah `&jenis=ADHB` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data deret waktu (*timeseries*) dalam rentang `start` hingga `end`:**
-     * **Ekspektasi:** Status kode `200 OK`, waktu respons di bawah `1000 ms`, dan JSON valid.
-     * **Validasi Struktur:** Properti `kode` pada respons sesuai dengan parameter `kode` yang diminta, serta memiliki properti `data` bertipe *array* berisi objek `{ periode, nilai }`.
-  2. **\[Edge Case\] Rentang periode `start` sama dengan `end` (1 titik data) atau rentang periode belum memiliki data:**
-     * **Ekspektasi:** Status `200 OK` dengan properti `data` berupa *array* berisi 1 elemen atau *array* kosong `[]` secara konsisten.
-  3. **\[Negative\] Periode `start` lebih besar dari `end`, format periode salah (misal bulan `M13`), parameter wajib hilang, atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan pesan error yang jelas dan tidak mengembalikan `500`.
+  1. **\[Positive\] Ambil data *timeseries* dalam rentang periode `start` hingga `end`:**
+     * **Ekspektasi:** Status `200 OK`, properti `kode` sesuai parameter query, dan properti `data` berisi *array* objek `{ periode, nilai }`.
+  2. **\[Edge Case\] `start` sama dengan `end` atau rentang periode kosong:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan `data` berisi 1 elemen atau *array* kosong `[]`.
+  3. **\[Negative\] `start` lebih besar dari `end`, parameter wajib hilang, atau tanpa token:**
+     * **Ekspektasi:** Mengembalikan `400`/`422` atau `401 Unauthorized`.
 
 ---
 
-### 7. PKRT — `GET Get Indikator`
+### 8. Ambil Daftar Indikator — `GET /api/v1/{modul}/indikator` (`Get Indikator`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/indikator?kode_wilayah=00`
-* **Parameter Query:** `kode_wilayah` (`00`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00`
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil daftar indikator PKRT pada suatu wilayah:**
-     * **Ekspektasi:** Status kode `200 OK`, waktu respons di bawah `1000 ms`, dan JSON valid bertipe *array*.
-     * **Validasi Struktur Item:** Jika *array* tidak kosong, setiap elemen harus memiliki *field* `kode` dan `deskripsi` bertipe *string* non-kosong serta nilai `kode` yang unik.
-  2. **\[Edge Case\] `kode_wilayah` tidak ditemukan / belum memiliki indikator:**
-     * **Ekspektasi:** Status `200 OK` dengan respons berupa *array* kosong `[]`.
-  3. **\[Negative\] Parameter `kode_wilayah` tidak dikirim atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (token invalid) atau `400`/`422` (parameter wajib hilang) dalam format JSON.
+  1. **\[Positive\] Ambil daftar kode dan deskripsi indikator unik pada suatu wilayah:**
+     * **Ekspektasi:** Status `200 OK`, respons bertipe *array*, setiap item memiliki `kode` dan `deskripsi` yang tidak kosong.
+  2. **\[Edge Case\] Wilayah belum memiliki indikator terdaftar:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]`.
+  3. **\[Negative\] Parameter `kode_wilayah` hilang atau token tidak valid:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 8. PKRT — `GET Get Latest Data`
+### 9. Ambil Data Periode Terbaru — `GET /api/v1/{modul}/latest` (`Get Latest Data`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/latest?kode_wilayah=00`
-* **Parameter Query:** `kode_wilayah` (`00`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00` (opsional: `&jenis=ADHB` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data PKRT periode terbaru berdasarkan `kode_wilayah`:**
-     * **Ekspektasi:** Status kode `200 OK`, `Content-Type` `application/json`, waktu respons di bawah `1000 ms`, dan *body* berupa JSON valid.
-  2. **\[Edge Case\] Belum ada data sama sekali pada `kode_wilayah` tersebut:**
-     * **Ekspektasi:** Status tetap `200 OK` dengan respons JSON kosong (*array* `[]`) tanpa memicu *error* `500` akibat *query* nilai maksimum/terbaru yang kosong.
-  3. **\[Negative\] Parameter `kode_wilayah` kosong atau token autentikasi tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan pesan error JSON yang informatif.
+  1. **\[Positive\] Ambil seluruh data pada periode paling mutakhir yang tersedia di database:**
+     * **Ekspektasi:** Status `200 OK`, waktu respons `< 1000 ms`, dan *body* JSON valid.
+  2. **\[Edge Case\] Tabel modul kosong untuk wilayah tersebut:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong `[]` tanpa *error* `500`.
+  3. **\[Negative\] Akses tanpa token atau parameter `kode_wilayah` tidak dikirim:**
+     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `422 Unprocessable Entity`.
 
 ---
 
-### 9. PKRT — `GET Get Growth Data by Kode and Type`
+### 10. Ambil Data Pertumbuhan — `GET /api/v1/{modul}/growth` (`Get Growth Data by Kode and Type`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/growth?kode_wilayah=00&kode=MA1014&type=qtoq`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA1014`), `type` (`qtoq`, opsi lain: `mtom`, `yony_m`, `yotd`, `yony`, `ctoc`, `annual`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}&type={type}` (ditambah `&jenis=ADHK` untuk PDB; opsi `type`: `qtoq`, `mtom`, `yony_m`, `yotd`, `yony`, `ctoc`, `annual`)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Hitung dan ambil data pertumbuhan berdasarkan `kode` dan `type`:**
-     * **Ekspektasi:** Status kode `200 OK`, respons JSON berbentuk *object* dengan *field* `kode` dan `type` yang sesuai query.
-     * **Validasi Struktur Data:** Properti `data` bertipe *array* di mana tiap item memiliki `periode`, `nilai` (*finite number*), dan `growth` (`null` pada periode awal yang tidak punya pembanding, dan angka valid pada periode berikutnya).
-  2. **\[Edge Case\] Data hanya tersedia 1 periode (sehingga belum bisa dihitung pertumbuhannya) atau data kosong:**
-     * **Ekspektasi:** Status `200 OK` dengan `growth: null` pada periode pertama atau `data: []` tanpa memicu error pembagian dengan nol (`ZeroDivisionError`).
-  3. **\[Negative\] Parameter `type` tidak dikenali (di luar daftar jenis growth), parameter wajib hilang, atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (token invalid) atau `400`/`422` dengan detail kesalahan pada parameter `type`/`kode`.
+  1. **\[Positive\] Hitung pertumbuhan berdasarkan `kode` dan `type`:**
+     * **Ekspektasi:** Status `200 OK`, respons objek JSON dengan `kode` dan `type` yang cocok dengan query, serta `data` berisi objek `{ periode, nilai, growth }`.
+  2. **\[Edge Case\] Periode awal yang tidak memiliki periode pembanding atau nilai pembanding bernilai `0`:**
+     * **Ekspektasi:** Status `200 OK` dengan nilai `growth: null` pada titik tersebut tanpa memicu `ZeroDivisionError` (`500`).
+  3. **\[Negative\] Nilai `type` di luar opsi yang didukung atau tanpa token:**
+     * **Ekspektasi:** Mengembalikan `400`/`422` atau `401 Unauthorized`.
 
 ---
 
-### 10. PKRT — `GET Get Quarter Data by Kode`
+### 11. Ambil Agregasi Triwulanan — `GET /api/v1/{modul}/quarter` (`Get Quarter Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/quarter?kode_wilayah=00&kode=MA100`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}`
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil agregasi data triwulanan berdasarkan `kode_wilayah` dan `kode`:**
-     * **Ekspektasi:** Status kode `200 OK`, respons berupa objek JSON valid dengan *field* `kode` yang sesuai query dan properti `data` bertipe *array*.
-  2. **\[Edge Case\] Kode tidak dikenal, data bulanan tidak lengkap dalam satu triwulan, atau data kosong:**
-     * **Ekspektasi:** Mengembalikan `200 OK`, `data: []`, serta tetap mencantumkan `kode` yang diminta tanpa *error* `500`.
-  3. **\[Negative\] Parameter wajib (`kode`/`kode_wilayah`) kosong atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan pesan detail JSON (`detail`/`message`), bukan `500`.
+  1. **\[Positive\] Ambil data hasil konversi/agregasi triwulanan berdasarkan `kode`:**
+     * **Ekspektasi:** Status `200 OK`, objek JSON valid dengan `kode` sesuai query dan `data` bertipe *array*.
+  2. **\[Edge Case\] Data bulanan belum lengkap untuk membentuk triwulan atau `kode` tidak ditemukan:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan `data: []`.
+  3. **\[Negative\] Parameter wajib hilang atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 11. PKRT — `GET Get Annual Data by Kode`
+### 12. Ambil Agregasi Tahunan — `GET /api/v1/{modul}/annual` (`Get Annual Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/annual?kode_wilayah=00&kode=MA100`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}` (ditambah `&jenis=ADHK` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil agregasi data tahunan berdasarkan `kode_wilayah` dan `kode`:**
-     * **Ekspektasi:** Status kode `200 OK`, respons objek JSON valid dengan `kode` yang sesuai query dan properti `data` bertipe *array*.
-  2. **\[Edge Case\] Kode tidak dikenal atau data tahunan belum tersedia:**
-     * **Ekspektasi:** Mengembalikan `200 OK` dengan `data: []` dan tetap melakukan *echo* terhadap `kode` yang diminta tanpa *internal server error* (`500`).
-  3. **\[Negative\] Parameter wajib hilang/kosong atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan pesan detail JSON.
+  1. **\[Positive\] Ambil data hasil agregasi tahunan berdasarkan `kode`:**
+     * **Ekspektasi:** Status `200 OK`, objek JSON valid dengan `kode` sesuai query dan `data` bertipe *array*.
+  2. **\[Edge Case\] Data tahunan belum tersedia untuk `kode` tersebut:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan `data: []`.
+  3. **\[Negative\] Parameter wajib kosong atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 12. PKRT — `GET Get Chart Data by Kode`
+### 13. Ambil Data Grafik Standar — `GET /api/v1/{modul}/chart` (`Get Chart Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/chart?kode_wilayah=00&kode=MA100`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}` (ditambah `&jenis=ADHK` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data format grafik standar berdasarkan `kode`:**
-     * **Ekspektasi:** Status kode `200 OK`, waktu respons di bawah `500 ms`, dan JSON valid.
-     * **Validasi Struktur:** Memiliki properti `kode`, `xAxis`, dan `series` (bertipe *array*).
-  2. **\[Edge Case\] Data kosong untuk `kode` atau `kode_wilayah` tertentu:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan struktur `xAxis` dan `series` berupa *array* kosong `[]` agar komponen grafik *frontend* tidak *error*.
-  3. **\[Negative\] Parameter wajib (`kode`/`kode_wilayah`) tidak dikirim atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (tanpa token valid) atau `400`/`422` (parameter tidak lengkap) dalam format JSON.
+  1. **\[Positive\] Ambil struktur data siap pakai untuk visualisasi grafik (`kode`, `xAxis`, `series`):**
+     * **Ekspektasi:** Status `200 OK`, waktu respons `< 1000 ms`, dan properti `xAxis` serta `series` bertipe *array*.
+  2. **\[Edge Case\] Data indikator kosong pada wilayah yang diminta:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan `xAxis: []` dan `series: []`.
+  3. **\[Negative\] Parameter wajib tidak dikirim atau tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 13. PKRT — `GET Get Growth Chart Data by Kode and Type`
+### 14. Ambil Data Grafik Pertumbuhan — `GET /api/v1/{modul}/growth/chart` (`Get Growth Chart Data by Kode and Type`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/growth/chart?kode_wilayah=00&kode=MA100&type=ctoc`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`), `type` (`ctoc`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}&type={type}` (ditambah `&jenis=ADHK` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data format grafik pertumbuhan berdasarkan `kode` dan `type`:**
-     * **Ekspektasi:** Status kode `200 OK`, waktu respons di bawah `500 ms`, dan JSON valid.
-     * **Validasi Struktur:** Memiliki properti `kode`, `type`, `xAxis` (*array*), dan `series` (*array*).
-  2. **\[Edge Case\] Data pertumbuhan kosong atau nilai pembanding bernilai nol:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan `xAxis: []` dan `series: []` (atau nilai `null` pada titik yang tidak terdefinisi) tanpa memicu `500 Internal Server Error`.
-  3. **\[Negative\] Parameter `type` tidak valid, parameter wajib kosong, atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan pesan error JSON yang jelas.
+  1. **\[Positive\] Ambil data visualisasi grafik pertumbuhan (`kode`, `type`, `xAxis`, `series`):**
+     * **Ekspektasi:** Status `200 OK` dan seluruh properti grafik memiliki tipe data yang sesuai.
+  2. **\[Edge Case\] Data pertumbuhan kosong atau hanya memiliki 1 titik periode:**
+     * **Ekspektasi:** Mengembalikan `200 OK` tanpa *server error*.
+  3. **\[Negative\] Parameter `type` tidak valid atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `400`/`422` atau `401 Unauthorized`.
 
 ---
 
-### 14. PKRT — `GET Get Quarter Chart Data by Kode`
+### 15. Ambil Data Grafik Triwulanan — `GET /api/v1/{modul}/quarter/chart` (`Get Quarter Chart Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/quarter/chart?kode_wilayah=00&kode=MA100`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}`
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data format grafik triwulanan berdasarkan `kode`:**
-     * **Ekspektasi:** Status kode `200 OK`, waktu respons di bawah `500 ms`, dan JSON valid.
-     * **Validasi Struktur:** Memiliki properti `kode`, `xAxis`, dan `series` (*array*).
-  2. **\[Edge Case\] Data triwulanan belum tersedia untuk kode/wilayah tersebut:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan `xAxis` dan `series` berupa *array* kosong `[]`.
-  3. **\[Negative\] Parameter wajib hilang/kosong atau token tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dalam format JSON tanpa error `500`.
+  1. **\[Positive\] Ambil data visualisasi grafik triwulanan (`kode`, `xAxis`, `series`):**
+     * **Ekspektasi:** Status `200 OK` dengan struktur `xAxis` dan `series` bertipe *array*.
+  2. **\[Edge Case\] Data triwulanan kosong:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong.
+  3. **\[Negative\] Parameter wajib kosong atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 15. PKRT — `GET Get Annual Chart Data by Kode`
+### 16. Ambil Data Grafik Tahunan — `GET /api/v1/{modul}/annual/chart` (`Get Annual Chart Data by Kode`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/annual/chart?kode_wilayah=00&kode=MA100`
-* **Parameter Query:** `kode_wilayah` (`00`), `kode` (`MA100`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pdb`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00&kode={kode}` (ditambah `&jenis=ADHK` untuk PDB)
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil data format grafik tahunan berdasarkan `kode`:**
-     * **Ekspektasi:** Status kode `200 OK` dan JSON valid dengan kode metadata yang mencerminkan `kode` dan `kode_wilayah` pada parameter *request*.
-  2. **\[Edge Case\] Kode tidak dikenal / data tahunan kosong:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan *array* data kosong dan tetap melakukan *echo* terhadap `kode` yang diminta tanpa *error* `500`.
-  3. **\[Negative\] Token tidak valid atau parameter wajib kosong/tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` atau `400`/`422` dengan detail pesan error yang jelas dan tidak pernah mengembalikan `500 Internal Server Error`.
+  1. **\[Positive\] Ambil data visualisasi grafik tahunan (`kode`, `xAxis`, `series`):**
+     * **Ekspektasi:** Status `200 OK` dan JSON valid.
+  2. **\[Edge Case\] Data tahunan kosong:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan *array* kosong.
+  3. **\[Negative\] Parameter wajib kosong atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
 
 ---
 
-### 16. PKRT — `GET Get Aggregated Data`
+### 17. Ambil Data Teragregasi Wilayah — `GET /api/v1/{modul}/aggregated` (`Get Aggregated Data`)
 
-* **Endpoint:** `{{base_url}}/api/v1/pkrt/aggregated?kode_wilayah=00`
-* **Parameter Query:** `kode_wilayah` (`00`)
+* **Berlaku untuk:** `pkrt`, `pkp`, `pmtb`, `eksim`, `pklnprt`, `inventori`
+* **Parameter Query:** `kode_wilayah=00`
 * **Skenario Pengujian:**
-  1. **\[Positive\] Ambil seluruh data teragregasi PKRT pada suatu wilayah:**
-     * **Ekspektasi:** Status kode `200 OK`, `Content-Type` `application/json`, waktu respons di bawah `500 ms`, dan *body* berupa objek JSON valid.
-     * **Validasi Struktur:**
-       * Memiliki properti tingkat atas `data` bertipe *object* (bukan *array*).
-       * Setiap entri indikator di dalam `data` memuat objek `indikator` (memiliki *field* `string`: `kode`, `deskripsi`, `satuan`, `freq`, `konversi`) dan objek `series`.
-       * Pada setiap *bucket* di dalam `series` yang memiliki `periods` dan `values`, keduanya bertipe *array* dengan panjang elemen (`length`) yang sama persis.
-  2. **\[Edge Case\] Wilayah belum memiliki data teragregasi atau sebagian *bucket* frekuensi (bulanan/triwulanan/tahunan) kosong:**
-     * **Ekspektasi:** Tetap mengembalikan `200 OK` dengan struktur objek `data` kosong `{}` atau *array* `periods` dan `values` yang sama-sama kosong `[]` tanpa *server error*.
-  3. **\[Negative\] Parameter `kode_wilayah` tidak dikirim/tidak valid atau token autentikasi tidak valid:**
-     * **Ekspektasi:** Mengembalikan `401 Unauthorized` (tanpa token valid) atau `400`/`422` (parameter wajib hilang) dalam format JSON yang valid.
+  1. **\[Positive\] Ambil seluruh paket data indikator dan seri waktu teragregasi pada suatu wilayah:**
+     * **Ekspektasi:** Status `200 OK`, memiliki properti tingkat atas `data` bertipe *object*, setiap entri memuat `indikator` (`kode`, `deskripsi`, `satuan`, `freq`, `konversi`) dan `series` dengan panjang *array* `periods` dan `values` yang sama persis.
+  2. **\[Edge Case\] Wilayah belum memiliki data teragregasi:**
+     * **Ekspektasi:** Mengembalikan `200 OK` dengan `data: {}` tanpa memicu `404 Not Found` maupun `500 Internal Server Error`.
+  3. **\[Negative\] Parameter `kode_wilayah` tidak dikirim atau akses tanpa token:**
+     * **Ekspektasi:** Mengembalikan `422 Unprocessable Entity` atau `401 Unauthorized`.
+
+---
+
+## Rekapitulasi Jumlah Request per Modul (Sinkron dengan Postman Collection)
+
+| No | Folder / Modul | Jumlah Request | Keterangan |
+| :---: | :--- | :---: | :--- |
+| 1 | `Auth` | 1 | `POST /api/v1/auth/login` |
+| 2 | `PKRT` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| 3 | `PKP` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| 4 | `PMTB` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| 5 | `EKSIM` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| 6 | `PDB` | 13 | Tanpa `/quarter`, `/quarter/chart`, dan `/aggregated`; termasuk duplikat `POST` |
+| 7 | `PKLNPRT` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| 8 | `INVENTORI` | 16 | Termasuk `POST Add Data` & `POST Add Data (Duplicate - Expect Fail)` |
+| **Total** | **Seluruh Koleksi** | **110** | **100% Konsisten antara Dokumentasi MD & Postman Collection** |
